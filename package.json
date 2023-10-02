@@ -24,7 +24,7 @@
     "postcoverage": "open-cli coverage/lcov-report/index.html",
     "validate": "yarn lint && yarn test",
     "postpublish": "git push --tags",
-    "docs": "apidoc -i src -o docs",
+    "docs": "apidoc -i src -o docs"
   },
   "repository": {
     "type": "git",
