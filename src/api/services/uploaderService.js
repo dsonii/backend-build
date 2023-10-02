@@ -7,14 +7,33 @@ const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { s3Client } = require("../../config/s3Client");
 const BUCKET_NAME = process.env.AWS_S3_BUCKET;
 const CDNURL = process.env.CDN_URL;
-const fs = require("fs");
+const path = require("path");
+const fs = require("fs").promises;
 const sharp = require("sharp");
+const uuidv4 = require("uuid/v4");
+
 /**
  *
  * @param  {string}  base64 Data
  * @return {string}  Image url
  */
 module.exports = {
+  uploadLocal: async (base64, FolderName) => {
+    // Decode base64 data to binary
+    const base64Image = base64.replace(/^data:image\/\w+;base64,/, "");
+    const filename = `${uuidv4()}.png`;
+    // Specify the path where you want to save the file within the public directory
+    const filePath = path.join(
+      __dirname,
+      "../../../public",
+      FolderName,
+      filename
+    );
+
+    // Use async/await to write the binary data to the file
+    await fs.writeFile(filePath, base64Image, "base64");
+    return `${process.env.FULL_BASEURL}public/${FolderName}/${filename}`;
+  },
   imageUpload: async (base64, filename, folderName) => {
     // console.log('1212 ',base64, userId, folderName)
     // Ensure that you POST a base64 data to your server.
@@ -60,7 +79,8 @@ module.exports = {
 
     return location;
   },
-  fileUpload: async (fileData, filename, folderName) => { // upload file the digial ocean spaces 
+  fileUpload: async (fileData, filename, folderName) => {
+    // upload file the digial ocean spaces
     try {
       const fileExt = fileData.name.split(".").pop();
       const bucketParams = {
