@@ -11,7 +11,8 @@ const password = encodeURIComponent(mongo.password);
 const database = mongo.db;
 const rs = mongo.rs;
 
-const mongoDBURL = `mongodb+srv://${username}:${password}@${host}/${database}?authSource=admin&replicaSet=${rs}`;
+const mongoDBURL = mongo.uri ? mongo.uri : `mongodb+srv://${username}:${password}@${host}/${database}?authSource=admin&replicaSet=${rs}`;
+
 //console.log("mongoDBURL", mongoDBURL);
 
 // Exit application on error
