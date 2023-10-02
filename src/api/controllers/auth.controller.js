@@ -18,7 +18,13 @@ const Listeners = require("../events/Listener");
 const { omit } = require("lodash");
 const APIError = require("../utils/APIError");
 const emailProvider = require("../services/emails/emailProvider");
-const { imageDelete, imageUpload,resizeUpload } = require("../services/uploaderService");
+const {
+  imageDelete,
+  imageUpload,
+  resizeUpload,
+  uploadLocal,
+  deleteLocal,
+} = require("../services/uploaderService");
 const uuidv4 = require("uuid/v4");
 const mongoose = require("mongoose");
 const { isValidURL } = require("../helpers/validate");
@@ -105,8 +111,8 @@ exports.access = async (req, res, next) => {
   try {
     const { roleId } = req.body;
     const getPermissions = await Role.getPermission(roleId);
-    const general = await Setting.getgeneral()
-    return res.json({ permissions: getPermissions.permissions,general });
+    const general = await Setting.getgeneral();
+    return res.json({ permissions: getPermissions.permissions, general });
   } catch (error) {
     return next(error);
   }
@@ -364,7 +370,7 @@ exports.authLists = async (req, res, next) => {
             ],
           },
           fullname: { $concat: ["$firstname", " ", "$lastname"] },
-		  short_name: {
+          short_name: {
             $toUpper: {
               $concat: [
                 { $substr: ["$firstname", 0, 1] },
@@ -707,16 +713,22 @@ exports.create = async (req, res, next) => {
       role,
     };
 
+    const isProductionS3 = await Setting.gets3();
+
     //  console.log("picture", picture);
-   if (picture && await Admin.isValidBase64(picture)) {
-      // upload data to aws s3,
-      const base64 = picture.replace(/^data:image\/\w+;base64,/, "");
-      const buffer = await resizeUpload(true, base64, 40, 40);
-      objadmin.picture = await imageUpload(
-        buffer,
-        `profile-${uuidv4()}`,
-        FolderName
-      );
+    if (picture && (await Admin.isValidBase64(picture))) {
+      if (isProductionS3.is_production) {
+        // upload data to aws s3,
+        const base64 = picture.replace(/^data:image\/\w+;base64,/, "");
+        const buffer = await resizeUpload(true, base64, 40, 40);
+        objadmin.picture = await imageUpload(
+          buffer,
+          `profile-${uuidv4()}`,
+          FolderName
+        );
+      } else {
+        objadmin.picture = await uploadLocal(picture, FolderName);
+      }
     } else {
       objadmin.picture = "public/profile/default.png";
     }
@@ -848,7 +860,6 @@ exports.status = async (req, res, next) => {
   }
 };
 
- 
 /**
  * Update existing user
  * @public
@@ -874,6 +885,8 @@ exports.update = async (req, res, next) => {
     } = req.body;
 
     const adminexists = await Admin.findById(req.params.adminId).exec();
+    const isProductionS3 = await Setting.gets3();
+
     const FolderName = process.env.S3_BUCKET_AGENTDOC;
 
     if (adminexists) {
@@ -882,23 +895,27 @@ exports.update = async (req, res, next) => {
         lastname,
         email,
         phone,
-		role:slug(role),
+        role: slug(role),
         is_active,
       };
-      
-	  if (picture && await Admin.isValidBase64(picture)) {
-        // upload data to aws s3
-        Admin.isValidURL(adminexists.picture)
-          ? await imageDelete(adminexists.picture, FolderName)
-          : "";
+
+      if (picture && (await Admin.isValidBase64(picture))) {
+        if (isProductionS3.is_production) {
+          // upload data to aws s3
+          Admin.isValidURL(adminexists.picture)
+            ? await imageDelete(adminexists.picture, FolderName)
+            : "";
 
           const base64 = picture.replace(/^data:image\/\w+;base64,/, "");
           const buffer = await resizeUpload(true, base64, 40, 40);
-        update.picture = await imageUpload(
-          buffer,
-          `profile-${uuidv4()}`,
-          FolderName
-        );
+          update.picture = await imageUpload(
+            buffer,
+            `profile-${uuidv4()}`,
+            FolderName
+          );
+        } else {
+          update.picture = await uploadLocal(picture, FolderName);
+        }
       } else {
         update.picture = adminexists.picture;
       }
