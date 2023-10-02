@@ -1,0 +1,67 @@
+const mongoose = require("mongoose");
+const { omitBy, isNil } = require("lodash");
+const { Schema } = mongoose;
+const moment = require("moment-timezone");
+const { ObjectId } = Schema;
+const mongoosePaginate = require("mongoose-paginate-v2");
+
+const ticketSchema = new Schema(
+  {
+    name: { type: String, default: "" },
+    start_at:{type:String,default:""},
+    end_at:{type:String,default:""},
+    busId: { type: ObjectId, ref: "Bus", required: true },
+    routeId: { type: ObjectId, ref: "Route" },
+    seat_count: { type: String, index: true, default: "0" },
+    seat_remain: { type: String, index: true, default: "0" },
+    seat_booked: { type: String, index: true, default: "0" },
+    status:{type:Boolean,default:true},
+    travel_status: {
+      type: String,
+      enum: [
+        "SEARCHING",
+        "CANCELLED",
+        "ACCEPTED",
+        "ASSIGNED",
+        "STARTED",
+        "ARRIVED",
+        "PICKEDUP",
+        "DROPPED",
+        "COMPLETED",
+        "SCHEDULED",
+      ],
+      default: "",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+//assistant
+
+ticketSchema.statics = {
+  async updateTicket(ticketId, status) {
+    try {
+      const update = this.updateOne({ _id: ticketId }, status);
+      return update.n > 0;
+    } catch (err) {
+      console.log("err", err);
+      return "err while : " + err;
+    }
+  },
+  transformData(data){
+    const selectableItems = [];
+    const i = 1;
+    data.forEach((item) => {
+      selectableItems.push({
+        
+      });
+    });
+    return selectableItems;
+  }
+};
+
+ticketSchema.plugin(mongoosePaginate);
+
+module.exports = mongoose.model("Ticket", ticketSchema);
