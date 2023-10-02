@@ -19,7 +19,10 @@ const driverSchema = new mongoose.Schema(
     currentLocation: {
       type: { type: String, default: "Point" },
       address: { type: String, default: "" },
-      coordinates: [Number],
+      coordinates: {
+        type: [Number], // An array of [longitude, latitude] coordinates
+        default: [0, 0], // Default coordinates [0, 0]
+      },
     },
     email: {
       type: String,
@@ -54,9 +57,9 @@ const driverSchema = new mongoose.Schema(
     country_code: { type: String, default: "91" },
     type: { type: String, enum: ["driver", "assistant"], default: "assistant" },
     device_token: { type: String, default: "", index: true },
-    device_type:{type:Number,enum:[1,2],index:true,default:1}, // 1 === android 2 === ios
+    device_type: { type: Number, enum: [1, 2], index: true, default: 1 }, // 1 === android 2 === ios
     is_deleted: { type: Boolean, default: false },
-	national_id: { type: String, default: "" },
+    national_id: { type: String, default: "" },
     picture: {
       type: String,
       trim: true,
@@ -72,7 +75,11 @@ const driverSchema = new mongoose.Schema(
       default: "default.jpg",
     },
     status: { type: Boolean, default: false },
-    duty_status:{type:String,enum:['ONLINE','TRACKING','OFFLINE'],default:"OFFLINE"}
+    duty_status: {
+      type: String,
+      enum: ["ONLINE", "TRACKING", "OFFLINE"],
+      default: "OFFLINE",
+    },
   },
   {
     timestamps: true,
@@ -243,11 +250,11 @@ driverSchema.statics = {
         id: item._id,
         pageid: objectIdToTimestamp(item._id),
         title: item.firstname + " " + item.lastname,
-        country_code:item.country_code,
-        phone:item.phone,
-        picture:this.isValidURL(item.picture)
-            ? item.picture
-            : `${FULLBASEURL}public/drivers/profiles/` + item.picture
+        country_code: item.country_code,
+        phone: item.phone,
+        picture: this.isValidURL(item.picture)
+          ? item.picture
+          : `${FULLBASEURL}public/drivers/profiles/` + item.picture,
       });
     });
     return selectableItems;
@@ -337,7 +344,7 @@ driverSchema.statics = {
 
 driverSchema.plugin(paginateAggregate);
 
-driverSchema.index({ "location": "2dsphere" });
+driverSchema.index({ location: "2dsphere" });
 
 /**
  * @typedef Driver

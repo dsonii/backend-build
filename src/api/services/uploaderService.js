@@ -11,6 +11,7 @@ const path = require("path");
 const fs = require("fs").promises;
 const sharp = require("sharp");
 const uuidv4 = require("uuid/v4");
+const url = require('url');
 
 /**
  *
@@ -33,6 +34,27 @@ module.exports = {
     // Use async/await to write the binary data to the file
     await fs.writeFile(filePath, base64Image, "base64");
     return `${process.env.FULL_BASEURL}public/${FolderName}/${filename}`;
+  },
+  deleteLocal: async (fileURL, FolderName) => {
+    // Parse the URL
+    const parsedUrl = url.parse(fileURL);
+
+    // Get the file name from the parsed URL
+    const fileName = path.basename(parsedUrl.pathname);
+
+    const filePath = path.join(
+      __dirname,
+      "../../../public",
+      FolderName,
+      fileName
+    );
+
+    // Check if the file exists
+    if (fs.access(filePath)) {
+      fs.unlink(filePath); // Delete the file
+      return true;
+    }
+    return false;
   },
   imageUpload: async (base64, filename, folderName) => {
     // console.log('1212 ',base64, userId, folderName)

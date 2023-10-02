@@ -1,7 +1,13 @@
 const httpStatus = require("http-status");
 const { omit, isEmpty } = require("lodash");
 const Driver = require("../models/driver.model");
-const { imageDelete, imageUpload } = require("../services/uploaderService");
+const Setting = require("../models/setting.model");
+const {
+  imageDelete,
+  imageUpload,
+  uploadLocal,
+  deleteLocal,
+} = require("../services/uploaderService");
 const base64Img = require("base64-img");
 const faker = require("../helpers/faker");
 const { VARIANT_ALSO_NEGOTIATES } = require("http-status");
@@ -16,7 +22,6 @@ exports.testData = (req, res) => {
   res.json({ d });
 };
 
-
 /**
  * check Driver with the driver is exists.
  * @public
@@ -29,7 +34,7 @@ exports.isDriverExists = async (req, res, next) => {
         $or: [{ national_id: national_id }, { phone: phone }, { email: email }],
       });
       console.log(`isExists : phone`, isExists);
-       if(isExists && isExists > 1) {
+      if (isExists && isExists > 1) {
         res.status(httpStatus.OK);
         res.json({
           status: false,
@@ -45,7 +50,6 @@ exports.isDriverExists = async (req, res, next) => {
     return next(error);
   }
 };
-
 
 /**
  * Get user
@@ -68,7 +72,7 @@ exports.get = async (req, res, next) => {
           email: 1,
           phone: 1,
           type: 1,
-		  national_id: 1,
+          national_id: 1,
           duty_status: { $ifNull: ["$duty_status", "OFFLINE"] },
           document_licence: {
             $cond: [
@@ -123,7 +127,7 @@ exports.get = async (req, res, next) => {
               `${process.env.FULL_BASEURL}public/drivers/documents/default.jpg`,
             ],
           },
-          status:1,
+          status: 1,
           // status: {
           //   $cond: {
           //     if: { $eq: ["$status", true] },
@@ -210,7 +214,7 @@ exports.search = async (req, res, next) => {
             { lastname: { $regex: new RegExp(search), $options: "i" } },
             { phone: { $regex: new RegExp(search), $options: "i" } },
             { email: { $regex: new RegExp(search), $options: "i" } },
-			{ national_id: { $regex: new RegExp(search), $options: "i" } },
+            { national_id: { $regex: new RegExp(search), $options: "i" } },
           ],
           type,
           is_deleted: false,
@@ -360,7 +364,7 @@ exports.create = async (req, res, next) => {
       lastname,
       email,
       type,
-	  national_id,
+      national_id,
       country_code,
       phone,
       status,
@@ -379,38 +383,69 @@ exports.create = async (req, res, next) => {
       phone,
       status,
       type,
-	  national_id,
+      national_id,
     };
-    if (picture) {
-      objDriver.picture = await imageUpload(
-        picture,
-        `profile_${uuidv4()}`,
-        FolderName
-      );
+
+    const isProductionS3 = await Setting.gets3();
+
+    if (picture && (await Setting.isValidBase64(picture))) {
+      if (isProductionS3.is_production) {
+        objDriver.picture = await imageUpload(
+          picture,
+          `profile_${uuidv4()}`,
+          FolderName
+        );
+      } else {
+        objDriver.picture = await uploadLocal(picture, FolderName);
+      }
     }
 
-    if (document_licence) {
-      objDriver.document_licence = await imageUpload(
-        document_licence,
-        `document_licence_${uuidv4()}`,
-        FolderName
-      );
+    if (document_licence && (await Setting.isValidBase64(picture))) {
+      if (isProductionS3.is_production) {
+        objDriver.document_licence = await imageUpload(
+          document_licence,
+          `document_licence_${uuidv4()}`,
+          FolderName
+        );
+      } else {
+        objDriver.document_licence = await uploadLocal(
+          document_licence,
+          FolderName
+        );
+      }
     }
 
-    if (document_national_icard) {
-      objDriver.document_national_icard = await imageUpload(
-        document_national_icard,
-        `document_national_icard_${uuidv4()}`,
-        FolderName
-      );
+    if (document_national_icard && (await Setting.isValidBase64(picture))) {
+      if (isProductionS3.is_production) {
+        objDriver.document_national_icard = await imageUpload(
+          document_national_icard,
+          `document_national_icard_${uuidv4()}`,
+          FolderName
+        );
+      } else {
+        objDriver.document_national_icard = await uploadLocal(
+          document_national_icard,
+          FolderName
+        );
+      }
     }
 
-    if (document_police_vertification) {
-      objDriver.document_police_vertification = await imageUpload(
-        document_police_vertification,
-        `document_police_vertification_${uuidv4()}`,
-        FolderName
-      );
+    if (
+      document_police_vertification &&
+      (await Setting.isValidBase64(picture))
+    ) {
+      if (isProductionS3.is_production) {
+        objDriver.document_police_vertification = await imageUpload(
+          document_police_vertification,
+          `document_police_vertification_${uuidv4()}`,
+          FolderName
+        );
+      } else {
+        objDriver.document_police_vertification = await uploadLocal(
+          document_police_vertification,
+          FolderName
+        );
+      }
     }
 
     const driver = new Driver(objDriver);
@@ -443,43 +478,73 @@ exports.update = async (req, res, next) => {
       phone: req.body.phone,
       status: req.body.status,
       type: req.body.type,
-	  national_id: req.body.national_id,
+      national_id: req.body.national_id,
     };
 
+    const isProductionS3 = await Setting.gets3();
+
     if (Driver.isValidBase64(req.body.picture)) {
-      await imageDelete(driverexists.picture, FolderName);
-      objUpdate.picture = await imageUpload(
-        req.body.picture,
-        `profile-${uuidv4()}`,
-        process.env.S3_BUCKET_DRIVER_PROFILE
-      );
+      if (isProductionS3.is_production) {
+        await imageDelete(driverexists.picture, FolderName);
+        objUpdate.picture = await imageUpload(
+          req.body.picture,
+          `profile-${uuidv4()}`,
+          process.env.S3_BUCKET_DRIVER_PROFILE
+        );
+      } else {
+        objDriver.picture = await uploadLocal(picture, FolderName);
+      }
     }
 
     if (Driver.isValidBase64(req.body.document_licence)) {
-      await imageDelete(driverexists.document_licence, FolderName);
-      objUpdate.document_licence = await imageUpload(
-        req.body.document_licence,
-        `document_licence_${uuidv4()}`,
-        FolderName
-      );
+      if (isProductionS3.is_production) {
+        await imageDelete(driverexists.document_licence, FolderName);
+        objUpdate.document_licence = await imageUpload(
+          req.body.document_licence,
+          `document_licence_${uuidv4()}`,
+          FolderName
+        );
+      } else {
+        objDriver.document_licence = await uploadLocal(
+          req.body.document_licence,
+          FolderName
+        );
+      }
     }
 
     if (Driver.isValidBase64(req.body.document_national_icard)) {
-      await imageDelete(driverexists.document_national_icard, FolderName);
-      objUpdate.document_national_icard = await imageUpload(
-        req.body.document_national_icard,
-        `document_national_icard_${uuidv4()}`,
-        FolderName
-      );
+      if (isProductionS3.is_production) {
+        await imageDelete(driverexists.document_national_icard, FolderName);
+        objUpdate.document_national_icard = await imageUpload(
+          req.body.document_national_icard,
+          `document_national_icard_${uuidv4()}`,
+          FolderName
+        );
+      } else {
+        objDriver.document_national_icard = await uploadLocal(
+          req.body.document_national_icard,
+          FolderName
+        );
+      }
     }
 
     if (Driver.isValidBase64(req.body.document_police_vertification)) {
-      await imageDelete(driverexists.document_police_vertification, FolderName);
-      objUpdate.document_police_vertification = await imageUpload(
-        req.body.document_police_vertification,
-        `document_police_vertification_${uuidv4()}`,
-        FolderName
-      );
+      if (isProductionS3.is_production) {
+        await imageDelete(
+          driverexists.document_police_vertification,
+          FolderName
+        );
+        objUpdate.document_police_vertification = await imageUpload(
+          req.body.document_police_vertification,
+          `document_police_vertification_${uuidv4()}`,
+          FolderName
+        );
+      } else {
+        objDriver.document_police_vertification = await uploadLocal(
+          req.body.document_police_vertification,
+          FolderName
+        );
+      }
     }
 
     const updatedrivers = await Driver.findByIdAndUpdate(
@@ -546,7 +611,7 @@ exports.list = async (req, res, next) => {
                 $options: "i",
               },
             },
-			{
+            {
               national_id: {
                 $regex: new RegExp(req.query.global_search),
                 $options: "i",
@@ -622,7 +687,7 @@ exports.list = async (req, res, next) => {
           firstname: 1,
           lastname: 1,
           country_code: 1,
-		  national_id: 1,
+          national_id: 1,
           fullname: { $concat: ["$firstname", " ", "$lastname"] },
           email: 1,
           phone: 1,
@@ -756,22 +821,42 @@ exports.list = async (req, res, next) => {
 exports.remove = async (req, res, next) => {
   try {
     const FolderName = process.env.S3_BUCKET_DRIVERDOC;
+    const isProductionS3 = await Setting.gets3();
     if (await Driver.exists({ _id: req.params.driverId })) {
       const getdriver = await Driver.findOne({ _id: req.params.driverId });
       if (Driver.isValidURL(getdriver.picture)) {
-        await imageDelete(getdriver.picture, FolderName);
+        if (isProductionS3.is_production) {
+          await imageDelete(getdriver.picture, FolderName);
+        } else {
+          await deleteLocal(getdriver.picture, FolderName);
+        }
       }
       if (Driver.isValidURL(getdriver.document_licence)) {
-        await imageDelete(getdriver.document_licence, FolderName);
+        if (isProductionS3.is_production) {
+          await imageDelete(getdriver.document_licence, FolderName);
+        } else {
+          await deleteLocal(getdriver.document_licence, FolderName);
+        }
       }
       if (Driver.isValidURL(getdriver.document_national_icard)) {
-        await imageDelete(getdriver.document_national_icard, FolderName);
+        if (isProductionS3.is_production) {
+          await imageDelete(getdriver.document_national_icard, FolderName);
+        } else {
+          await deleteLocal(getdriver.document_national_icard, FolderName);
+        }
       }
       if (Driver.isValidURL(getdriver.document_police_vertification)) {
-        await imageDelete(
-          getdriver.document_police_vertification,
-          FolderName
-        );
+        if (isProductionS3.is_production) {
+          await imageDelete(
+            getdriver.document_police_vertification,
+            FolderName
+          );
+        } else {
+          await deleteLocal(
+            getdriver.document_police_vertification,
+            FolderName
+          );
+        }
       }
 
       const deleteDriver = await Driver.deleteOne({ _id: req.params.driverId });
