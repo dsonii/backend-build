@@ -1,5 +1,5 @@
 // You can either "yarn add aws-sdk" or "npm i aws-sdk"
-//const AWS = require('aws-sdk');
+
 const { S3Client, AbortMultipartUploadCommand } = require("@aws-sdk/client-s3");
 
 const BUCKET_NAME = process.env.AWS_S3_BUCKET;

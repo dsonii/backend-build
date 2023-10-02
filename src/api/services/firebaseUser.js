@@ -10,8 +10,8 @@ const firebaseAdmin = async () => {
     const firebase_credential = getSetting.notifications.firebase_credential;
 
     admin.initializeApp({
-      credential: admin.credential.cert(firebase_credential),
-      databaseURL: firebase_database_url,
+      credential: firebase_credential ? admin.credential.cert(firebase_credential) : '',
+      databaseURL: firebase_database_url ? firebase_database_url : '',
     });
     initializedApp = admin;
     //console.log("Firebase Admin SDK initialized successfully!");
