@@ -11,7 +11,7 @@ const path = require("path");
 const fs = require("fs").promises;
 const sharp = require("sharp");
 const uuidv4 = require("uuid/v4");
-const url = require('url');
+const url = require("url");
 
 /**
  *
@@ -30,6 +30,12 @@ module.exports = {
       FolderName,
       filename
     );
+    // Check if the directory exists
+    const directoryExists = await fs.stat(path.dirname(filePath));
+
+    if (!directoryExists.isDirectory()) {
+      await fs.mkdir(path.dirname(filePath), { recursive: true });
+    }
 
     // Use async/await to write the binary data to the file
     await fs.writeFile(filePath, base64Image, "base64");
