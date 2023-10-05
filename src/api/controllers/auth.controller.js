@@ -887,7 +887,7 @@ exports.update = async (req, res, next) => {
     const adminexists = await Admin.findById(req.params.adminId).exec();
     const isProductionS3 = await Setting.gets3();
 
-    const FolderName = process.env.S3_BUCKET_AGENTDOC;
+    const FolderName = process.env.S3_BUCKET_USERPRO;
 
     if (adminexists) {
       const update = {
