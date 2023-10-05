@@ -354,12 +354,13 @@ exports.search = async (req, res, next) => {
  */
 exports.update = async (req, res, next) => {
   try {
-    const { firstname, lastname, email, phone, status } = req.body;
+    const { firstname, lastname, email, country_code, phone, status } = req.body;
     const update = {
       firstname,
       lastname,
       email,
       phone,
+      country_code,
       status,
     };
     const updateusers = await User.findByIdAndUpdate(

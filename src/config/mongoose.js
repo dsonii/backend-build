@@ -11,7 +11,9 @@ const password = encodeURIComponent(mongo.password);
 const database = mongo.db;
 const rs = mongo.rs;
 
-const mongoDBURL = mongo.uri ? mongo.uri : `mongodb+srv://${username}:${password}@${host}/${database}?authSource=admin&replicaSet=${rs}`;
+const mongoDBURL = mongo.uri
+  ? mongo.uri
+  : `mongodb+srv://${username}:${password}@${host}/${database}?authSource=admin&replicaSet=${rs}`;
 
 //console.log("mongoDBURL", mongoDBURL);
 
@@ -35,8 +37,8 @@ mongoose.set("strictQuery", true);
 exports.connect = () => {
   mongoose
     .connect(mongoDBURL, {
-    //  useCreateIndex: true,
       keepAlive: true,
+      autoIndex: false,
     })
     .then(() => console.log("mongoDB connected..."));
   return mongoose.connection;

@@ -29,6 +29,7 @@ exports.fetch = async (req, res) => {
       defaultCountry: settings.general.default_country,
       defaultCurrency: settings.general.default_currency,
       timezone: settings.general.timezone,
+      googleKey:settings.general.google_key,
       dateFormat: settings.general.date_format,
       timeFormat: settings.general.time_format,
       maxDistance: settings.general.max_distance,

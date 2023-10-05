@@ -284,7 +284,7 @@ exports.create = async (req, res, next) => {
     await session.startTransaction();
 	let lastIntegerId = 1;
     const lastRoute = await Route.findOne({}).sort({ 'integer_id': -1 } );
-    lastIntegerId = (parseInt(lastRoute.integer_id) + lastIntegerId); // auto increment
+    lastIntegerId = lastRoute ? (parseInt(lastRoute.integer_id) + lastIntegerId) : lastIntegerId; // auto increment
     
 	const route = await new Route({
       title,
