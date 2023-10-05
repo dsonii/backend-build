@@ -26,7 +26,7 @@ module.exports = {
     // Specify the path where you want to save the file within the public directory
     const filePath = path.join(
       __dirname,
-      "../../../../public",
+      "../../../public",
       FolderName,
       filename
     );
@@ -50,7 +50,7 @@ module.exports = {
 
     const filePath = path.join(
       __dirname,
-      "../../../../public",
+      "../../../public",
       FolderName,
       fileName
     );
