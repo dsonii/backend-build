@@ -10,7 +10,7 @@ exports.isEnabled = async (req, res, next) => {
     const getPaymentGateway = await paymentGateway.findOne({
       is_enabled: "1",
     });
-    console.log("getPaymentGateway", getPaymentGateway);
+
     if (getPaymentGateway) {
       res.status(httpStatus.OK);
       res.json({
@@ -77,8 +77,8 @@ exports.update = async (req, res, next) => {
       name: "is_enabled",
       value: "1",
     });
-    console.log("getPaymemtSetting", getPaymemtSetting);
-    if (getPaymemtSetting && getPaymemtSetting.site != req.params.site) {
+  
+    if (getPaymemtSetting && getPaymemtSetting.site != req.params.site && is_enabled == "1") {
       res.status(httpStatus.OK);
       res.json({
         message: `Please disabled the payment gateway ${getPaymemtSetting.site} first.`,
