@@ -11,6 +11,36 @@ const { getFirstLetters } = require("../helpers/validate");
 const path = require("path");
 const fs = require("fs");
 
+exports.terms = async (req, res) => {
+  try {
+    const settings = await Setting.findOne({}, "terms").sort({ _id: -1 });
+    res.status(httpStatus.OK);
+    res.json({
+      status: true,
+      data: settings.terms,
+    });
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
+exports.privacy = async (req, res) => {
+  try {
+    const settings = await Setting.findOne({}, "privacypolicy").sort({
+      _id: -1,
+    });
+    res.status(httpStatus.OK);
+    res.json({
+      status: true,
+      data: settings.privacypolicy,
+    });
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
 /**
  * Get application settings
  * @public
@@ -317,7 +347,7 @@ exports.update = async (req, res, next) => {
           default_currency: general.default_currency,
           date_format: general.date_format,
           time_format: general.time_format,
-        //  google_key: general.google_key,
+          //  google_key: general.google_key,
           fee: general.fee,
           tax: general.tax,
           api_base_url: general.api_base_url,

@@ -5,6 +5,10 @@ const { authorize, ADMIN, getAuth } = require("../../middlewares/auth");
 
 const router = express.Router();
 
+router.route("/term-and-conditions").get(controller.terms);
+
+router.route("/privacy").get(controller.privacy);
+
 router
   .route("/")
   .post(
