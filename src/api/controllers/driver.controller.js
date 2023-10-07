@@ -28,13 +28,18 @@ exports.testData = (req, res) => {
  */
 exports.isDriverExists = async (req, res, next) => {
   try {
-    const { phone, email, national_id } = req.body;
-    if (phone || email || national_id) {
-      const isExists = await Driver.countDocuments({
-        $or: [{ national_id: national_id }, { phone: phone }, { email: email }],
+    const { name, id } = req.body;
+    if (name && name != "") {
+      const isExists = await Driver.findOne({
+        $or: [
+          { national_id: { $regex: new RegExp(name), $options: "i" } },
+          { phone: { $regex: new RegExp(name), $options: "i" } },
+          { email: { $regex: new RegExp(name), $options: "i" } },
+        ],
+        _id: { $nin: [mongoose.Types.ObjectId(id)] },
       });
       console.log(`isExists : phone`, isExists);
-      if (isExists && isExists > 1) {
+      if (isExists) {
         res.status(httpStatus.OK);
         res.json({
           status: false,
@@ -45,6 +50,11 @@ exports.isDriverExists = async (req, res, next) => {
           status: true,
         });
       }
+    } else {
+      res.status(httpStatus.OK);
+      res.json({
+        status: true,
+      });
     }
   } catch (error) {
     return next(error);

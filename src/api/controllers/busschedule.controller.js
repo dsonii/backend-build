@@ -515,15 +515,17 @@ exports.status = async (req, res) => {
  * @public
  */
 exports.remove = async (req, res) => {
-   BusSchedule.deleteOne({
+  BusSchedule.deleteOne({
     _id: req.params.busScheduleId,
   })
-    .then(async () =>{
-	   await busScheduleLocation.deleteMany({busScheduleId : req.params.busScheduleId });
+    .then(async () => {
+      await busScheduleLocation.deleteMany({
+        busScheduleId: req.params.busScheduleId,
+      });
       res.status(httpStatus.OK).json({
         status: true,
         message: "Bus Schedule deleted successfully.",
-      })
+      });
     })
-    .catch(e => next(e));
+    .catch((e) => next(e));
 };

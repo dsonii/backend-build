@@ -28,24 +28,24 @@ RouteStopSchema.index({ "stops.location": "2dsphere" });
 RouteStopSchema.statics = {
   async updateRouteStop(dataObj, routeId) {
     try {
-       let i = 1;
-
-      if (await this.exists({ routeId })) { // if exists update route and if stop not found then create
+      if (await this.exists({ routeId })) {
+        // if exists update route and if stop not found then create
         dataObj.forEach(async (item) => {
           const objUpdate = {
-            order: i++,
+            order: item.order,
+            duration_pickup: item.duration_pickup,
+            duration_drop: item.duration_drop,
             minimum_fare_pickup: item.minimum_fare_pickup,
             minimum_fare_drop: item.minimum_fare_drop,
             price_per_km_pickup: item.price_per_km_pickup,
             price_per_km_drop: item.price_per_km_drop,
-          //  departure_time: item.departure_time,
-          //  arrival_time: item.arrival_time,
+            departure_time: item.departure_time,
+            arrival_time: item.arrival_time,
           };
-		  
-        if (typeof item.location == "object") {
+          if (item.id != "") {
             objUpdate.routeId = routeId;
-            objUpdate.stopId = item.location.id;
-            await this.findByIdAndUpdate(item.id, objUpdate, { new: true, upsert: true });
+            objUpdate.stopId = item.stopId;
+            await this.findByIdAndUpdate(item.id, objUpdate, { new: true });
           } else {
             objUpdate.routeId = routeId;
             objUpdate.stopId = item.location.id;
@@ -56,9 +56,9 @@ RouteStopSchema.statics = {
               { new: true, upsert: true }
             );
           }
-      
         });
-      } else { // not found create new route stops
+      } else {
+        // not found create new route stops
         dataObj.forEach(async (item) => {
           const objUpdate = {
             order: item.order,
@@ -68,8 +68,8 @@ RouteStopSchema.statics = {
             minimum_fare_drop: item.minimum_fare_drop,
             price_per_km_pickup: item.price_per_km_pickup,
             price_per_km_drop: item.price_per_km_drop,
-         // departure_time: item.departure_time,
-         // arrival_time: item.arrival_time,
+            departure_time: item.departure_time,
+            arrival_time: item.arrival_time,
           };
           objUpdate.routeId = routeId;
           objUpdate.stopId = item.location.id;
