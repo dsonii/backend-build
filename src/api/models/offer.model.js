@@ -49,7 +49,7 @@ offerSchema.statics = {
         terms: item.terms,
         picture: this.isValidURL(item.picture)
           ? item.picture
-          : `${FULLBASEURL}${item.picture}`,
+          : `${process.env.FULL_BASEURL}${item.picture}`,
         status: item.status == true ? 'Active' : 'Inactive',
         createdAt: moment
           .utc(item.createdAt)
