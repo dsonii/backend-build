@@ -231,7 +231,6 @@ exports.list = async (req, res, next) => {
     };
 
     const result = await Location.paginate(condition, paginationoptions);
-    //  console.log('result.locations', result.locations);
     result.locations = Location.transformDataLists(result.locations);
     res.json({ data: result });
   } catch (error) {
@@ -281,7 +280,7 @@ exports.remove = (req, res, next) => {
             message: "stop deleted successfully.",
           })
         )
-        .catch((e) => next(e));
+        .catch(e => next(e));
     }
   });
 };

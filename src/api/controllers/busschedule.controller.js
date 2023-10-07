@@ -8,7 +8,7 @@ const busScheduleModel = require("../models/busSchedule.model");
 exports.search = async (req, res, next) => {
   try {
     const { search } = req.query;
-    console.log("req.query;", req.query, req.body);
+
     const condition = search
       ? {
           // $or: [
@@ -280,8 +280,12 @@ exports.get = async (req, res) => {
                 stopId: 1,
                 departure_time: 1,
                 arrival_time: 1,
+                order:1
               },
             },
+            {
+              $sort:{order:1}
+            }
           ],
           as: "bus_schedule_location",
         },
@@ -527,5 +531,5 @@ exports.remove = async (req, res) => {
         message: "Bus Schedule deleted successfully.",
       });
     })
-    .catch((e) => next(e));
+    .catch(e => next(e));
 };

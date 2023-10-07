@@ -61,7 +61,6 @@ exports.list = async (req, res, next) => {
     };
 
     const result = await Helper.paginate(condition, paginationoptions);
-    // console.log('result.helpers', result.helpers);
     result.helpers = Helper.transformDataLists(result.helpers)
     res.json({ data: result });
   } catch (error) {
@@ -76,7 +75,6 @@ exports.reply = async (req, res, next) => {
     const { adminId, email, title, content, type } = req.body;
 	const getHelper = await Helper.findById(helperId);
     if (getHelper) {
-		console.log("getHelper",getHelper);
       if (await User.exists({ email })) {
         let getUser = await User.findOne({ email }).lean();
         if (getUser) {

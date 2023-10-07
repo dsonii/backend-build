@@ -587,7 +587,6 @@ exports.update = async (req, res, next) => {
 exports.list = async (req, res, next) => {
   try {
     //  const drivers = await Driver.list(req.query);
-    //   console.log(req.query);
     let condition = req.query.global_search
       ? {
           $or: [

@@ -13,9 +13,6 @@ const Bus = require("../models/bus.model");
  exports.load = async (req, res, next) => {
   try {
     const buslayout = await BusLayout.find({status:true});
-	
-	console.log("buslayout",buslayout);
-	
     res.status(httpStatus.OK);
     res.json({
       message: 'Bus Layout load data.',
@@ -92,7 +89,6 @@ const Bus = require("../models/bus.model");
     sort = { [data.name]: (data.order != 'none') ? data.order : 'asc' };
   }
 
-  //    console.log('1212', sort);
   const paginationoptions = {
     page: req.query.page || 1,
     limit: req.query.per_page || 10,

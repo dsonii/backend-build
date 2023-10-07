@@ -93,7 +93,6 @@ exports.create = async (req, res, next) => {
             user : [req.body.user.id]
         };
 		
-		//console.log("payload",payload);
 		
 
         if (req.body.picture) {

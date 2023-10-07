@@ -18,7 +18,6 @@ const mongoose = require('mongoose');
 exports.get = async (req, res) => {
   try {
     const offer = await Offer.findById(req.params.offerId);
-    // console.log(route);
     res.status(httpStatus.OK);
     res.json({
       message: "Single offer successfully.",
@@ -233,14 +232,14 @@ exports.list = async (req, res, next) => {
 		   $dateToString: {
 			  timezone:DEFAULT_TIMEZONE,
 			  format: "%d-%m-%Y", // specify your desired date format
-			  date: "$start_date"     // replace with the actual date field you want to format
+			  date: "$start_date" // replace with the actual date field you want to format
 			}
 		  }, // moment.utc(item.start_date).format('MMM DD, YYYY'),
           end_date:  {
 			 $dateToString: {
 			  timezone:DEFAULT_TIMEZONE,
 			  format: "%d-%m-%Y", // specify your desired date format
-			  date: "$end_date"     // replace with the actual date field you want to format
+			  date: "$end_date" // replace with the actual date field you want to format
 			}
 		  }, // moment.utc(item.end_date).format('MMM DD, YYYY'),
           type: {

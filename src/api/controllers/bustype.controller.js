@@ -87,7 +87,6 @@ const Bus = require("../models/bus.model");
     sort = { [data.name]: (data.order != 'none') ? data.order : 'asc' };
   }
 
-  //    console.log('1212', sort);
   const paginationoptions = {
     page: req.query.page || 1,
     limit: req.query.per_page || 10,

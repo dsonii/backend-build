@@ -16,7 +16,6 @@ exports.countDown = async (req, res, next) => {
     const getHelpSupport = await HelpSupport.countDocuments({});
     const totalBooking = await Booking.countDocuments({ travel_status: 'COMPLETED' });
 
-    //console.log("DEFAULT_TIMEZONE",DEFAULT_TIMEZONE);
     const startDay = moment().tz(DEFAULT_TIMEZONE).startOf('day');
     const endDay = moment().tz(DEFAULT_TIMEZONE).endOf('day');
     const todayCompletedBooking = await Booking.countDocuments({ travel_status: 'COMPLETED', booking_date: { $gte: startDay, $lte: endDay } });
