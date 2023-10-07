@@ -79,6 +79,7 @@ const settingSchema = new mongoose.Schema(
       apple_key: { type: String, default: "", index: true },
     },
     terms: { type: String, index: true, default: "" },
+    privacypolicy:{ type: String, index: true, default: "" },
     refferal: { type: [Object], index: true },
     referral_policy: { type: String, index: true },
     cancellation_policy: { type: String, index: true },
@@ -123,6 +124,8 @@ settingSchema.statics = {
     }
   },
   transFormSingleData(data, type) {
+
+    console.log("data, type",data, type)
     if (type == "general") {
       return {
         id: data._id,
@@ -131,7 +134,7 @@ settingSchema.statics = {
         email: data.general.email,
         address: data.general.address,
         phone: data.general.phone,
-        google_key: data.general.google_key,
+        google_key: data.general.google_key.replace(/./g, '*'),
         timezone: data.general.timezone,
         date_format: data.general.date_format,
         time_format: data.general.time_format,
@@ -207,6 +210,12 @@ settingSchema.statics = {
         id: data._id,
         terms: data.terms,
         type: "terms",
+      };
+    } else if(type == "privacypolicy"){
+      return {
+        id: data._id,
+        privacypolicy: data.privacypolicy,
+        type: "privacypolicy",
       };
     } else if (type == "refunds") {
       return {

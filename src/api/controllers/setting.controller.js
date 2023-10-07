@@ -29,7 +29,7 @@ exports.fetch = async (req, res) => {
       defaultCountry: settings.general.default_country,
       defaultCurrency: settings.general.default_currency,
       timezone: settings.general.timezone,
-      googleKey:settings.general.google_key,
+      googleKey: settings.general.google_key,
       dateFormat: settings.general.date_format,
       timeFormat: settings.general.time_format,
       maxDistance: settings.general.max_distance,
@@ -290,6 +290,7 @@ exports.update = async (req, res, next) => {
       sms,
       smtp,
       terms,
+      privacypolicy,
       payments,
       s3,
       notifications,
@@ -316,7 +317,7 @@ exports.update = async (req, res, next) => {
           default_currency: general.default_currency,
           date_format: general.date_format,
           time_format: general.time_format,
-          google_key: general.google_key,
+        //  google_key: general.google_key,
           fee: general.fee,
           tax: general.tax,
           api_base_url: general.api_base_url,
@@ -328,7 +329,7 @@ exports.update = async (req, res, next) => {
           prebooking_time: general.prebooking_time,
         },
       };
-      if (general.logo != "" && await Setting.isValidBase64(general.logo)) {
+      if (general.logo != "" && (await Setting.isValidBase64(general.logo))) {
         if (isProductionS3.is_production) {
           settingObject.general.logo = await Setting.logoUpdate(
             req.params.settingId,
@@ -517,7 +518,30 @@ exports.update = async (req, res, next) => {
         type
       );
       res.json({
-        message: "settings updated successfully.",
+        message: "terms and condition updated successfully.",
+        data: transformedUsers,
+        status: true,
+      });
+    } else if (type == "privacypolicy") {
+      const settingObject = {
+        privacypolicy,
+      };
+      const updatesettings = await Setting.findByIdAndUpdate(
+        req.params.settingId,
+        {
+          $set: settingObject,
+        },
+        {
+          new: true,
+        }
+      );
+
+      const transformedUsers = Setting.transFormSingleData(
+        updatesettings,
+        type
+      );
+      res.json({
+        message: "privacy policy updated successfully.",
         data: transformedUsers,
         status: true,
       });
