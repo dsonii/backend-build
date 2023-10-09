@@ -38,6 +38,11 @@ const PaymentSchema = new Schema(
     amount: { type: String, default: '' },
     is_pass: { type: Boolean, default: false, index: true },
     total_pass_amount: { type: Number, default: 0 },
+    payment_type: {
+      type: String,
+      enum: ["wallet", "trip","pass","free","refund"],
+      default: "wallet",
+    },
     payment_status: {
       type: String,
       enum: [

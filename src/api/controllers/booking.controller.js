@@ -275,6 +275,7 @@ exports.list = async (req, res, next) => {
                 $expr: {
                   $in: ["$$booking_id", { $ifNull: ["$bookingId", []] }],
                 },
+                payment_type: { $in: ["trip", "pass"] },
               },
             },
             {
@@ -644,6 +645,7 @@ exports.bookingHistories = async (req, res, next) => {
                 $expr: {
                   $in: ["$$booking_id", { $ifNull: ["$bookingId", []] }],
                 },
+                payment_type: { $in: ["trip", "pass"] },
               },
             },
             {
