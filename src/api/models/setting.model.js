@@ -124,8 +124,6 @@ settingSchema.statics = {
     }
   },
   transFormSingleData(data, type) {
-
-    console.log("data, type",data, type)
     if (type == "general") {
       return {
         id: data._id,
@@ -193,6 +191,8 @@ settingSchema.statics = {
         port: data.smtp.port,
         encryption: data.smtp.encryption,
         password: data.smtp.password,
+        name:data.smtp.name,
+        email:data.smtp.email
       };
     } else if (type == "notifications") {
       return {
