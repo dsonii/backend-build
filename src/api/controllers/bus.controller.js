@@ -452,9 +452,7 @@ exports.update = async (req, res, next) => {
         new: true,
       }
     );
-    if (updatebus) {
-            Listeners.eventsListener.emit("UPDATE-TICKET", req.params.busId); // event to ASSIGNED ticket to driver
-        }
+ 
     const transformedBus = updatebus.transform();
     res.status(httpStatus.OK);
     res.json({
