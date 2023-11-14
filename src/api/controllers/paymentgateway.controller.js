@@ -42,7 +42,7 @@ exports.get = async (req, res, next) => {
     const convertedObject = {};
 
     getPaymentGateway.forEach((item) => {
-      convertedObject[item.name] = item.value.replace(/./g, '*');
+      convertedObject[item.name] = item.value;
     });
     res.status(httpStatus.OK);
     res.json({

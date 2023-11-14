@@ -347,7 +347,7 @@ exports.update = async (req, res, next) => {
           default_currency: general.default_currency,
           date_format: general.date_format,
           time_format: general.time_format,
-          google_key: "AIzaSyC59Y7evT_numeVQRjexnhBVC39MXUKOfY", //general.google_key,
+          google_key: general.google_key,
           fee: general.fee,
           tax: general.tax,
           api_base_url: general.api_base_url,

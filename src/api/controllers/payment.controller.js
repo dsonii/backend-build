@@ -116,8 +116,8 @@ exports.count = async (req, res, next) => {
     res.status(httpStatus.OK);
     res.json({
       message: "payment count fetched successfully.",
-      years_data: result[0].years_data,
-      data: result[0].data,
+      years_data: result.length > 0 ? result[0].years_data : "",
+      data: result.length > 0 ? result[0].data : [],
       status: true,
     });
   } catch (err) {
@@ -198,34 +198,14 @@ exports.list = async (req, res, next) => {
         };
     let sort = {};
     if (!req.query.sort) {
-      sort = { _id: -1 };
+      sort = { createdAt: -1 };
     } else {
       const data = JSON.parse(req.query.sort);
       sort = { [data.name]: data.order != "none" ? data.order : "asc" };
     }
 
     let filters = {};
-    // if (req.query.filters) {
-    //   const filtersData = JSON.parse(req.query.filters);
 
-    //   if (filtersData.type === "select") {
-    //     console.log("name", filtersData.name, filtersData.selected_options[0]);
-    //     filters = {
-    //       travel_status: req.query.travel_status,
-    //       is_deleted: false,
-    //     };
-    //   } else if (filtersData.type === "date") {
-    //     const today = moment(filtersData.value.startDate);
-    //     filters = {
-    //       booking_date: {
-    //         $gte: today.toDate(),
-    //         $lte: today.endOf("day").toDate(),
-    //       },
-    //       travel_status: req.query.travel_status,
-    //       is_deleted: false,
-    //     };
-    //   }
-    // }
 
     const aggregateQuery = Payment.aggregate([
       {
