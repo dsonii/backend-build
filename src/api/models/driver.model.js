@@ -65,6 +65,7 @@ const driverSchema = new mongoose.Schema(
       trim: true,
       default: "default.jpg",
     },
+    language: { type: String, enum:["en","ar"], default: "en" },
     document_licence: { type: String, default: "default.jpg" },
     document_adhar_card: {
       type: String,

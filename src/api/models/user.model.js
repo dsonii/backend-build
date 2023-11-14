@@ -38,6 +38,7 @@ const userSchema = new mongoose.Schema(
     },
     device_token: { type: String, default: "", index: true },
     device_type: { type: Number,enum:[1,2], default: 1, index: true }, // 1 === android , 2 === ios
+    language: { type: String, enum:["en","ar"], default: "en" },
     refercode: {
       type: String,
       trim: true,
