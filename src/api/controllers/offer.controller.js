@@ -3,13 +3,17 @@ const { omit, isEmpty } = require("lodash");
 const Route = require("../models/route.model");
 const Offer = require("../models/offer.model");
 const Booking = require("../models/booking.model");
+const Setting = require("../models/setting.model");
 const RouteDetail = require("../models/routeDetail.model");
-const { imageDelete, imageUpload } = require("../services/uploaderService");
+const {
+  imageDelete,
+  imageUpload,
+  uploadLocal,
+} = require("../services/uploaderService");
 const base64Img = require("base64-img");
-const faker = require("../helpers/faker");
 const { VARIANT_ALSO_NEGOTIATES } = require("http-status");
 const uuidv4 = require("uuid/v4");
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 /**
  * Get bus
@@ -51,6 +55,8 @@ exports.create = async (req, res, next) => {
       terms,
     } = req.body;
     const FolderName = process.env.S3_BUCKET_OFFER;
+    const isProductionS3 = await Setting.gets3();
+
     const saveOffer = {
       adminId,
       routeId: routeId || null,
@@ -64,12 +70,16 @@ exports.create = async (req, res, next) => {
       attempt,
       terms,
     };
-    if (picture) {
-      saveOffer.picture = await imageUpload(
-        picture,
-        `offer-${uuidv4()}`,
-        FolderName
-      );
+    if (picture && (await Offer.isValidBase64(picture))) {
+      if (isProductionS3.is_production) {
+        saveOffer.picture = await imageUpload(
+          picture,
+          `offer-${uuidv4()}`,
+          FolderName
+        );
+      } else {
+        saveOffer.picture = await uploadLocal(picture, FolderName);
+      }
     }
 
     const offer = await new Offer(saveOffer).save();
@@ -95,6 +105,7 @@ exports.create = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     const FolderName = process.env.S3_BUCKET_OFFER;
+    const isProductionS3 = await Setting.gets3();
     const offerexists = await Offer.findById(req.params.offerId).exec();
     if (offerexists) {
       const objUpdate = {
@@ -110,13 +121,17 @@ exports.update = async (req, res, next) => {
         routeId: req.body.routeId != "" ? req.body.routeId : null,
       };
 
-      if (Offer.isValidBase64(req.body.picture)) {
-        await imageDelete(offerexists.picture, FolderName);
-        objUpdate.picture = await imageUpload(
-          req.body.picture,
-          `offer-${uuidv4()}`,
-          FolderName
-        );
+      if (req.body.picture && Offer.isValidBase64(req.body.picture)) {
+        if (isProductionS3.is_production) {
+          await imageDelete(offerexists.picture, FolderName);
+          objUpdate.picture = await imageUpload(
+            req.body.picture,
+            `offer-${uuidv4()}`,
+            FolderName
+          );
+        } else {
+          objUpdate.picture = await uploadLocal(req.body.picture, FolderName);
+        }
       }
 
       const updateOffer = await Offer.findByIdAndUpdate(
@@ -228,20 +243,20 @@ exports.list = async (req, res, next) => {
           code: 1,
           discount: 1,
           attempt: 1,
-          start_date: { 
-		   $dateToString: {
-			  timezone:DEFAULT_TIMEZONE,
-			  format: "%d-%m-%Y", // specify your desired date format
-			  date: "$start_date" // replace with the actual date field you want to format
-			}
-		  }, // moment.utc(item.start_date).format('MMM DD, YYYY'),
-          end_date:  {
-			 $dateToString: {
-			  timezone:DEFAULT_TIMEZONE,
-			  format: "%d-%m-%Y", // specify your desired date format
-			  date: "$end_date" // replace with the actual date field you want to format
-			}
-		  }, // moment.utc(item.end_date).format('MMM DD, YYYY'),
+          start_date: {
+            $dateToString: {
+              timezone: DEFAULT_TIMEZONE,
+              format: "%d-%m-%Y", // specify your desired date format
+              date: "$start_date", // replace with the actual date field you want to format
+            },
+          }, // moment.utc(item.start_date).format('MMM DD, YYYY'),
+          end_date: {
+            $dateToString: {
+              timezone: DEFAULT_TIMEZONE,
+              format: "%d-%m-%Y", // specify your desired date format
+              date: "$end_date", // replace with the actual date field you want to format
+            },
+          }, // moment.utc(item.end_date).format('MMM DD, YYYY'),
           type: {
             $cond: {
               if: { $eq: ["$type", true] },
@@ -266,10 +281,10 @@ exports.list = async (req, res, next) => {
         $match: condition,
       },
     ]);
-	
-	 const result = await Offer.paginate(condition, options);
-      result.offers = Offer.transformData(result.offers);
-   // const result = await Offer.aggregatePaginate(aggregateQuery, options);
+
+    const result = await Offer.paginate(condition, options);
+    result.offers = Offer.transformData(result.offers);
+    // const result = await Offer.aggregatePaginate(aggregateQuery, options);
     res.json({ data: result });
   } catch (error) {
     next(error);
@@ -283,28 +298,32 @@ exports.list = async (req, res, next) => {
 exports.remove = async (req, res, next) => {
   try {
     const FolderName = process.env.S3_BUCKET_BUS;
-    if(await Offer.exists({ _id: req.params.offerId })) {
-		if(await Booking.exists({offerId:mongoose.Types.ObjectId(req.params.offerId)})){
-			res.status(httpStatus.OK).json({
-				  status: true,
-				  message: "Offer already used in booking. can't be deleted.",
-				});
-		}else{
-			  const offerexists = await Offer.findOne({ _id: req.params.offerId });
-			  if (Offer.isValidURL(offerexists.picture)) {
-				await imageDelete(offerexists.picture, FolderName);
-			  }
-			  const deleteOffer = await Offer.updateOne(
-				{ _id: req.params.offerId },
-				{ is_deleted: true }
-			  );
-			  if (deleteOffer) {
-				res.status(httpStatus.OK).json({
-				  status: true,
-				  message: "Offer deleted successfully.",
-				});
-			  }
-		}
+    if (await Offer.exists({ _id: req.params.offerId })) {
+      if (
+        await Booking.exists({
+          offerId: mongoose.Types.ObjectId(req.params.offerId),
+        })
+      ) {
+        res.status(httpStatus.OK).json({
+          status: true,
+          message: "Offer already used in booking. can't be deleted.",
+        });
+      } else {
+        const offerexists = await Offer.findOne({ _id: req.params.offerId });
+        if (Offer.isValidURL(offerexists.picture)) {
+          await imageDelete(offerexists.picture, FolderName);
+        }
+        const deleteOffer = await Offer.updateOne(
+          { _id: req.params.offerId },
+          { is_deleted: true }
+        );
+        if (deleteOffer) {
+          res.status(httpStatus.OK).json({
+            status: true,
+            message: "Offer deleted successfully.",
+          });
+        }
+      }
     }
   } catch (err) {
     next(err);
