@@ -10,12 +10,11 @@ const username = mongo.username;
 const password = encodeURIComponent(mongo.password);
 const database = mongo.db;
 const rs = mongo.rs;
-
+console.log("mongoDBDATABASE", database);
 const mongoDBURL = mongo.uri
   ? mongo.uri
-  : `mongodb+srv://${username}:${password}@${host}/${database}?authSource=admin&replicaSet=${rs}`;
-
-//console.log("mongoDBURL", mongoDBURL);
+  : `mongodb+srv://${username}:${password}@${host}/${database}`;
+const mongoDBURLNew = `${mongoDBURL}${database}`;
 
 // Exit application on error
 mongoose.connection.on("error", (err) => {
@@ -38,7 +37,7 @@ mongoose.set("strictQuery", true);
  */
 exports.connect = () => {
   mongoose
-    .connect(mongoDBURL, {
+    .connect(mongoDBURLNew, {
       keepAlive: true,
       autoIndex: false,
     })
