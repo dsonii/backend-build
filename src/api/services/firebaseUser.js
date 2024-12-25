@@ -8,7 +8,11 @@ const firebaseAdmin = async () => {
     const firebase_database_url =
       getSetting.notifications.firebase_database_url;
     const firebase_credential = getSetting.notifications.firebase_credential;
-
+    const CERT = firebase_credential.private_key?.replace(
+      /\\n/g,
+     '\n',
+    );
+    firebase_credential.private_key = CERT;
     admin.initializeApp({
       credential: firebase_credential ? admin.credential.cert(firebase_credential) : '',
       databaseURL: firebase_database_url ? firebase_database_url : '',

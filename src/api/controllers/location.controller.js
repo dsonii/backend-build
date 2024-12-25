@@ -83,7 +83,10 @@ exports.create = async (req, res, next) => {
     const FolderName = process.env.S3_BUCKET_LOCATION;
     let lastIntegerId = 1;
     const lastRoute = await Location.findOne({}).sort({ 'integer_id': -1 } );
-    lastIntegerId = (parseInt(lastRoute.integer_id) + lastIntegerId); // auto increment
+  
+    lastIntegerId = ((lastRoute ? parseInt(lastRoute.integer_id) : 0) + lastIntegerId); // auto increment
+    console.log(lastIntegerId);
+   
     const locationObject = {
       title,
       location: {
