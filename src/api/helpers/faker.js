@@ -16,6 +16,8 @@ module.exports = {
       newDriver.document_licence = '';
       newDriver.document_adhar_card = '';
       newDriver.document_police_vertification = '';
+      newDriver.license_expiry_date = '';
+      newDriver.police_vertification_expiry_date = '';
       arrdriver.push(newDriver);
     }
 

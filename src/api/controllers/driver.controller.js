@@ -83,6 +83,8 @@ exports.get = async (req, res, next) => {
           phone: 1,
           type: 1,
           national_id: 1,
+          licence_expiry_date: 1,
+          police_vertification_expiry_date: 1,
           duty_status: { $ifNull: ["$duty_status", "OFFLINE"] },
           document_licence: {
             $cond: [
@@ -382,6 +384,8 @@ exports.create = async (req, res, next) => {
       document_licence,
       document_national_icard,
       document_police_vertification,
+      licence_expiry_date,
+      police_vertification_expiry_date,
     } = req.body;
     const FolderName = process.env.S3_BUCKET_DRIVERDOC;
     const objDriver = {
@@ -394,6 +398,8 @@ exports.create = async (req, res, next) => {
       status,
       type,
       national_id,
+      licence_expiry_date,
+      police_vertification_expiry_date,
     };
 
     const isProductionS3 = await Setting.gets3();
@@ -489,6 +495,8 @@ exports.update = async (req, res, next) => {
       status: req.body.status,
       type: req.body.type,
       national_id: req.body.national_id,
+      licence_expiry_date: req.body.licence_expiry_date,
+      police_vertification_expiry_date: req.body.police_vertification_expiry_date,
     };
 
     const isProductionS3 = await Setting.gets3();
@@ -701,6 +709,8 @@ exports.list = async (req, res, next) => {
           email: 1,
           phone: 1,
           type: 1,
+          licence_expiry_date: 1,
+          police_vertification_expiry_date: 1,
           duty_status: { $ifNull: ["$duty_status", "OFFLINE"] },
           document_licence: {
             $cond: [

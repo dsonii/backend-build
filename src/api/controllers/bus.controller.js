@@ -287,9 +287,13 @@ exports.create = async (req, res, next) => {
       amenities,
       certificate_registration,
       certificate_pollution,
+      certificate_pollution_expiry_date,
       certificate_insurance,
+      certificate_insurance_expiry_date,
       certificate_fitness,
+      certificate_fitness_expiry_date,
       certificate_permit,
+      certificate_permit_expiry_date,
       status,
     } = req.body;
     const FolderName = process.env.S3_BUCKET_BUS;
@@ -304,6 +308,10 @@ exports.create = async (req, res, next) => {
       chassis_no,
       status,
       amenities,
+      certificate_pollution_expiry_date,
+      certificate_insurance_expiry_date,
+      certificate_fitness_expiry_date,
+      certificate_permit_expiry_date,
     };
     if (picture) {
       objBus.picture = await imageUpload(
@@ -385,6 +393,10 @@ exports.update = async (req, res, next) => {
       status: req.body.status,
       brand:req.body.brand,
       model_no:req.body.model_no,
+      certificate_pollution_expiry_date:req.body.certificate_pollution_expiry_date,
+      certificate_insurance_expiry_date:req.body.certificate_insurance_expiry_date,
+      certificate_fitness_expiry_date:req.body.certificate_fitness_expiry_date,
+      certificate_permit_expiry_date:req.body.certificate_permit_expiry_date,
       chassis_no:req.body.chassis_no,
       amenities:req.body.amenities,
     };
@@ -604,6 +616,10 @@ exports.list = async (req, res, next) => {
           amenities: 1,
           certificate_registration: 1,
           certificate_pollution: 1,
+          certificate_pollution_expiry_date:1, 
+          certificate_insurance_expiry_date:1,
+          certificate_fitness_expiry_date:1,
+          certificate_permit_expiry_date:1,
           certificate_insurance: 1,
           certificate_fitness:1,
           certificate_permit: 1,

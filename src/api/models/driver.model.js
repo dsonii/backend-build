@@ -60,6 +60,8 @@ const driverSchema = new mongoose.Schema(
     device_type: { type: Number, enum: [1, 2], index: true, default: 1 }, // 1 === android 2 === ios
     is_deleted: { type: Boolean, default: false },
     national_id: { type: String, default: "" },
+    licence_expiry_date: { type: Date },
+    police_vertification_expiry_date:  { type: Date },
     picture: {
       type: String,
       trim: true,
@@ -129,6 +131,8 @@ driverSchema.method({
       "document_licence",
       "status",
       "duty_status",
+      "licence_expiry_date",
+      "police_vertification_expiry_date",
       "createdAt",
     ];
 
@@ -275,6 +279,8 @@ driverSchema.statics = {
           country_code: item.country_code,
           phone: item.phone,
           type: item.type,
+          licence_expiry_date: item.licence_expiry_date,
+          police_vertification_expiry_date: item.police_vertification_expiry_date,
           picture: this.isValidURL(item.picture)
             ? item.picture
             : `${FULLBASEURL}public/drivers/profiles/` + item.picture,
