@@ -53,10 +53,15 @@ exports.create = async (req, res, next) => {
   try {
     const user = new User(req.body);
     const savedUser = await user.save();
+    const wallet = new Wallet({
+      refercode: req.body.refercode,
+      users: savedUser._id,
+    });
+    await wallet.save();
     res.status(httpStatus.CREATED);
     res.json({
       message: "User created successfully.",
-      user: savedUser.transform(),
+      user: savedUser,
       status: true,
     });
   } catch (error) {
@@ -79,6 +84,7 @@ exports.replace = async (req, res, next) => {
     const savedUser = await User.findById(user._id);
 
     res.json(savedUser.transform());
+    
   } catch (error) {
     next(User.checkDuplicateEmail(error));
   }
@@ -255,6 +261,8 @@ exports.list = async (req, res, next) => {
           email: 1,
           phone: 1,
           country_code:1,
+          customer_code:1,
+          company:1,
 		  language:1,
           createdAt:1,
           refercode: 1,
@@ -354,8 +362,10 @@ exports.search = async (req, res, next) => {
  */
 exports.update = async (req, res, next) => {
   try {
-    const { firstname, lastname, email, country_code, phone, status } = req.body;
+    const { company, customer_code, firstname, lastname, email, country_code, phone, status } = req.body;
     const update = {
+      company,
+      customer_code,
       firstname,
       lastname,
       email,

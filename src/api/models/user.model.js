@@ -8,6 +8,8 @@ const { env, FULLBASEURL } = require("../../config/vars");
 
 const userSchema = new mongoose.Schema(
   {
+    company: { type: String, default: "", index: true },
+    customer_code: { type: String, default: "", index: true },
     firstname: { type: String, default: "", index: true },
     lastname: { type: String, default: "", index: true },
     gender: { type: String,enum:['Male','Female','Other'], default: "Male", index: true },
@@ -106,6 +108,8 @@ userSchema.statics = {
   formatedSingleData(user) {
     if (!user.is_deleted) {
       return {
+        company: user.company,
+        customer_code: user.customer_code,
         firstname: user.firstname,
         lastname: user.lastname,
         gender: user.gender,
@@ -157,6 +161,8 @@ userSchema.statics = {
         id: i++,
         ids: item.id,
         fullname: item.firstname + " " + item.lastname,
+        company: item.company,
+        customer_code: item.customer_code,
         gender: item.gender,
         email: item.email,
         phone: item.phone,
