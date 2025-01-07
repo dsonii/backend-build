@@ -9,7 +9,7 @@ const base64Img = require("base64-img");
 const faker = require("../helpers/faker");
 const { VARIANT_ALSO_NEGOTIATES } = require("http-status");
 const mongoose = require('mongoose');
-
+const busSchedule = require("../services/busSchedule.service");
 
 exports.testData = (req, res) => {
   const d = faker.seedDrivers("123456");
@@ -143,6 +143,48 @@ exports.search = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.searchroute = async (req, res) => {
+    try {
+      var {
+        pickup_lat,
+        pickup_long,
+        drop_lat,
+        drop_long,
+      } = req.body.params;
+      const current_time = new Date().toLocaleTimeString('en-US', { hour12: false, hour: "numeric", minute: "numeric"});
+
+      const getnearestData = await busSchedule.nearestData(
+        parseFloat(pickup_long),
+        parseFloat(pickup_lat),
+        "",
+        parseFloat(drop_long),
+        parseFloat(drop_lat),
+        "",
+        current_time
+      );
+
+      if (getnearestData.length > 0) {
+        res.json({
+          message: "Successfully found route",
+          data: getnearestData,
+          status: true,
+        });
+      } else {
+        res.json({
+          message: "notfound route",
+          data: "",
+          status: false,
+        });
+      }
+    } catch (err) {
+      res.json({
+        message: "notfound route",
+        data: "",
+        status: false,
+      });
+    }
+  };
 
 
 

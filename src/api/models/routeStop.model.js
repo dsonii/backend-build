@@ -26,6 +26,55 @@ const RouteStopSchema = new Schema(
 RouteStopSchema.index({ "stops.location": "2dsphere" });
 
 RouteStopSchema.statics = {
+  async stopOrderValidate(pickupId, dropId) {
+    // validate the order stops
+    const stopIds = [...pickupId, ...dropId];
+    return this.aggregate([
+      {
+        $match: {
+          stopId: { $in: stopIds },
+        },
+      },
+      {
+        $group: {
+          _id: "$routeId",
+          stops: {
+            $push: "$stopId",
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          result: {
+            $cond: {
+              if: {
+                $eq: ["$stops", stopIds],
+              },
+              // Check if stops are in order
+              then: true,
+              // Route found in desired order
+              else: false, // Route not found in desired order
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          anyResultTrue: {
+            $max: "$result",
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          result: "$anyResultTrue",
+        },
+      },
+    ]);
+  },
   async updateRouteStop(dataObj, routeId) {
     try {
       if (await this.exists({ routeId })) {

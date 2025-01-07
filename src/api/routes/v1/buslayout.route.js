@@ -16,6 +16,9 @@ router
   .route('/search')
   .get(getAuth('bus.layout.view', 'master.admin'), Validate(buslayoutValidation.listBusLayouts), controller.list);
 
+router
+  .route("/searchseat/:busId")
+  .get(getAuth('bus.layout.view', 'master.admin'), controller.searchSeat);
 
 router
   .route('/:buslayoutId')

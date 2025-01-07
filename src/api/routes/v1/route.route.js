@@ -33,6 +33,9 @@ router
   .route('/:locationId/options')
   .get(controller.getLocationRoute);
 
+  router
+  .route('/route-search')
+   .post(controller.searchroute);
 
 router
   .route('/search')
@@ -69,6 +72,7 @@ router
   .route('/route-detail/:routeDetailId')
 
   .delete(getAuth('route.delete', 'master.admin'), controller.removeRouteDetail);
+
 
 
 module.exports = router;

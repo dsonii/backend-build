@@ -157,6 +157,52 @@ locationSchema.statics = {
     });
     return selectableItems;
   },
+  async nearestStops(lat, lng, maxDistance) {
+    return await this.aggregate([
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [parseFloat(lng), parseFloat(lat)],
+          },
+          distanceField: "distance",
+          maxDistance: maxDistance,
+          distanceField: "actual_distance",
+          spherical: true,
+          distanceMultiplier: 0.001,
+          includeLocs: "loc",
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          actual_distance: 1,
+          type: 1,
+        },
+      },
+      {
+        $addFields: {
+          near_distance: {
+            $cond: {
+              if: { $lt: ["$actual_distance", 1] }, // Check if distance is less than 1 km
+              then: {
+                $concat: [
+                  {
+                    $toString: { $multiply: ["$actual_distance", maxDistance] },
+                  }, // Convert to meters
+                  " m",
+                ],
+              },
+              else: {
+                $concat: [{ $toString: "$actual_distance" }, " km"],
+              },
+            },
+          },
+        },
+      },
+      { $limit: 1 },
+    ]);
+  },
 };
 
 locationSchema.plugin(mongoosePaginate);

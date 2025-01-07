@@ -44,7 +44,60 @@ const Bus = require("../models/bus.model");
   }
 };
 
+/**
+ * Get bus searchSeat
+ * @public
+ */
+exports.searchSeat = async (req, res) => {
+  try {
+    const aggregateQuery = await Bus.aggregate([
+      {
+        $match: {
+          $_id: { $in: mongoose.Types.ObjectId(req.params.busId) },
+        },
+      },
+      {
+        $lookup: {
+          from: "bus_layouts",
+          localField: "buslayoutId",
+          foreignField: "_id",
+          as: "buslayout",
+        },
+      },
+      {
+        $unwind: "$buslayout"
+      },
+      {
+        $project:{
+          ids: "$_id",
+          name: 1,
+          layout:{ $ifNull:["$buslayout.name",""]},
+          max_seats:{ $ifNull:["$buslayout.max_seats",""]},
+          seat_numbers:{ $ifNull:["$buslayout.seat_numbers",""]},
+          status:{
+            $cond: {
+              if: { $eq: ["$status", true] },
+              then: "Active",
+              else: "Inactive",
+            },
+          },
+          createdAt:1
+        }
+      }
+    ]);
 
+
+    res.status(httpStatus.OK);
+    res.json({
+      message: "Single route successfully.",
+      data: aggregateQuery, //Route.transFormSingleData(route),
+      status: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
 /**
  * Create new bus layout
  * @public
