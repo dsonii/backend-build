@@ -23,6 +23,16 @@ ticketSchema.virtual("bookings", {
 
 
 ticketSchema.statics = {
+    async fetch(busId) {
+        try {
+            const findTicket = await this.findOne({ busId: busId });
+            if (findTicket) {
+                return findTicket;
+            }
+        } catch (err) {
+            return 'err while' + err;
+        }
+    },
     async create(busId, seat_count) {
         try {
             if (!(await this.exists({ busId }))) {

@@ -65,7 +65,7 @@ const bookingSchema = new mongoose.Schema(
       ],
       default: "SCHEDULED",
     },
-    payment_mode: { type: String, enum: ["WALLET", "UPI", "PAYTM", "CARD"] },
+    payment_mode: { type: String, enum: ["WALLET", "UPI", "PAYTM", "CARD", "CASH"] },
     distance: { type: String, default: "" },
     duration: { type: String, default: "" },
     has_return: { type: Boolean, default: false },

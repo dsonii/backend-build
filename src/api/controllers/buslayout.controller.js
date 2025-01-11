@@ -4,6 +4,8 @@ const {
 } = require('lodash');
 const BusLayout = require('../models/busLayout.model');
 const Bus = require("../models/bus.model");
+const Booking = require("../models/booking.model");
+const mongoose = require("mongoose");
 
 
 /**
@@ -50,10 +52,12 @@ const Bus = require("../models/bus.model");
  */
 exports.searchSeat = async (req, res) => {
   try {
+    let new_seat = [];
+    mongoose.set('debug', true);
     const aggregateQuery = await Bus.aggregate([
       {
         $match: {
-          $_id: { $in: mongoose.Types.ObjectId(req.params.busId) },
+          _id: { $in: [mongoose.Types.ObjectId(req.params.busId)] },
         },
       },
       {
@@ -85,12 +89,39 @@ exports.searchSeat = async (req, res) => {
         }
       }
     ]);
+    if (aggregateQuery) {
+      let seat_numbers = aggregateQuery[0].seat_numbers;
+      trimseat_nos = seat_numbers.split(",").map(function (item) { return item.trim() });
+      if (trimseat_nos) {
+        
+        const getBookedSeats = await Booking.find({
+          busId:mongoose.Types.ObjectId(req.params.busId), 
+          seat_nos: { $in: trimseat_nos },
+          bus_depature_date: {$gte: new Date()},
+          travel_status: "SCHEDULED",
+          scheduleId : req.query.scheduleId,
+        });
+       
+        if (getBookedSeats) {
+          for (dseats of getBookedSeats) { 
+            let currentAssignedSeats = dseats.seat_nos.toString();
+            if (trimseat_nos.includes(currentAssignedSeats)){
+                trimseat_nos.splice(trimseat_nos.indexOf(currentAssignedSeats), 1); 
+            }
+          }
+        }
+      }
+    }
 
-
+    if (trimseat_nos) {
+      for (seatNo of trimseat_nos) {
+        new_seat.push({text:seatNo, value:seatNo});
+      }
+    }
     res.status(httpStatus.OK);
     res.json({
       message: "Single route successfully.",
-      data: aggregateQuery, //Route.transFormSingleData(route),
+      data: new_seat,
       status: true,
     });
   } catch (error) {

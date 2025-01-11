@@ -41,6 +41,13 @@ const userSchema = new mongoose.Schema(
     device_token: { type: String, default: "", index: true },
     device_type: { type: Number,enum:[1,2], default: 1, index: true }, // 1 === android , 2 === ios
     language: { type: String, enum:["en","ar"], default: "en" },
+    defaultBookingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Booking",
+      required: false,
+    }, 
+    defaultTime: { type: Date, default: "" },
+    isReturn:{ type: Number,enum:[1,2], default: 1, index: true }, // 1 === is return true , 2 === false
     refercode: {
       type: String,
       trim: true,

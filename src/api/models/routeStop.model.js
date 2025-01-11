@@ -75,6 +75,19 @@ RouteStopSchema.statics = {
       },
     ]);
   },
+  validateAndConvert(inputString) {
+    // Remove any leading or trailing spaces
+    inputString = inputString.trim();
+
+    // Check if the inputString contains a comma
+    if (inputString.includes(",")) {
+      // Split the string into an array using comma as the separator
+      return inputString.split(",").map((item) => item.trim());
+    } else {
+      // If there's no comma, convert the single item to an array
+      return [inputString];
+    }
+  },
   async updateRouteStop(dataObj, routeId) {
     try {
       if (await this.exists({ routeId })) {

@@ -25,6 +25,40 @@ const passengerSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+PassengerSchema.statics = {
+  transformFormatData(data) {
+       const selectableItems = [];
+       data.forEach((item) => {
+           selectableItems.push({
+               userId:item.userId,
+               bookingId: item.bookingId,
+               busId: item.busId,
+               fullname: item.fullname,
+               age: item.age,
+               gender: item.gender,
+               seat: item.seat
+           });
+       });
+       return selectableItems;
+   },
+   passengerFormatData(bookingId,busId,userId,data) {
+       const selectableItems = [];
+       data.forEach((item) => {
+           selectableItems.push({
+               userId:userId,
+               bookingId: bookingId,
+               busId: busId,
+               fullname: item.fullname,
+               age: item.age,
+               gender: item.gender,
+               seat: item.seat
+           });
+       });
+       return selectableItems;
+   },
+}
+
 passengerSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model("Passenger", passengerSchema);

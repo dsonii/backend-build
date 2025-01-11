@@ -5,7 +5,11 @@ const User = require("../models/user.model");
 const Booking = require("../models/booking.model");
 const Payment = require("../models/payment.model");
 const Passenger = require("../models/passenger.model");
+const Ticket = require("../models/ticket.model");
 const mongoose = require("mongoose");
+const moment = require("moment-timezone");
+const HelperCustom = require('../helpers/custom');
+const nanoid = require("nanoid");
 /**
  * Load user and append to req.
  * @public
@@ -54,16 +58,183 @@ exports.create = async (req, res, next) => {
     const user = new User(req.body);
     const savedUser = await user.save();
     const wallet = new Wallet({
-      refercode: req.body.refercode,
+      refercode: nanoid(15),
       users: savedUser._id,
     });
-    await wallet.save();
-    res.status(httpStatus.CREATED);
-    res.json({
-      message: "User created successfully.",
-      user: savedUser,
-      status: true,
-    });
+
+    const savedWallet = await wallet.save();
+    
+    const session = await mongoose.startSession();
+    const {
+          busScheduleId,
+          route,
+          bus,
+          pickup_location,
+          drop_location,
+          has_return,
+          seat,
+        } = req.body;
+    if (busScheduleId && route && bus)    {
+      const currentDate = moment().format("YYYY-MM-DD");
+      const datetime = new Date();
+      let current_date = moment(datetime).toDate();
+      let userId = savedUser._id;
+      let walletId = savedWallet._id;
+      let offer_code = "";
+      const passengerdetails = {
+                        fullname: savedUser.firstname+ ' ' +savedUser.lastname,
+                        age: savedUser.age,
+                        gender: savedUser.gender,
+                        seat: seat
+                      };
+      
+      // Start session
+      await session.startTransaction();
+      const seats = fareData.seat_no.replace(/\[|\]/g, "").split(","); // convert string to Array
+      const passengers = seats.length;
+      const walletBalance = await Wallet.findById(walletId);
+      var saveObj = {};
+      var offer_id = null;
+      var attempt = 0;
+      var offer_discount_amount = 0;
+      saveObj = {
+        busscheduleId: fareData.busschedule_id,
+        pnr_no: fareData.pnr_no,
+        routeId: fareData.route_id,
+        pickupId: fareData.pickup_stop_id,
+        dropoffId: fareData.drop_stop_id,
+        busId: fareData.bus_id,
+        offerId: null,
+        userId,
+        seat_nos: seats,
+        distance: fareData.distance,
+        has_return: fareData.has_return === "1" ? false : true,
+        start_time: fareData.pickup_time,
+        start_date: fareData.created_date,
+        drop_time: fareData.drop_time,
+        drop_date: fareData.created_date,
+        passengers,
+        sub_total: fareData.sub_total,
+        final_total_fare: fareData.final_total_fare,
+        discount: "0",
+        tax_amount: fareData.tax_amount,
+        tax: fareData.tax,
+        fee: fareData.fee,
+        ip: req.ip,
+        travel_status: "PROCESSING",
+        booking_date: new Date(
+          fareData.created_date + " " + fareData.pickup_time
+        ),
+        bus_depature_date: new Date(
+          moment(fareData.created_date)
+            .tz("Asia/Kolkata")
+            .format("YYYY-MM-DD")
+        ),
+      };
+
+      if (
+        !(await Booking.exists({
+          pnr_no: fareData.pnr_no,
+        }))
+      ) {
+        // const seat_count
+        const getticket = await Ticket.fetch(fareData.bus_id);
+        saveObj.ticketId = getticket ? getticket._id : null;
+        const getbookingData = await new Booking(saveObj).save();
+        if (getbookingData) {
+          const bookingId = getbookingData._id;
+          const getBooking = await Booking.findOne({
+            pnr_no: fareData.pnr_no,
+          })
+            .populate({
+              path: "routeId",
+              select: "title",
+            })
+            .populate({
+              path: "pickupId",
+              select: "title",
+            })
+            .populate({
+              path: "dropoffId",
+              select: "title",
+            })
+            .populate({
+              path: "busId",
+              select: "name model_no",
+            })
+            .lean();
+
+          const passenger = await Passenger.passengerFormatData(
+            bookingId,
+            fareData.bus_id,
+            userId,
+            passengerDetailsItem
+          );
+          const persistedPassenger = await Passenger.insertMany(passenger);
+          // finish transcation
+          await session.commitTransaction();
+          session.endSession();
+          res.status(httpStatus.CREATED);
+          res.json({
+            message: "User created successfully.",
+            user: savedUser,
+            booking: getBooking,
+            status: true,
+          });
+        } else {
+          res.status(httpStatus.CREATED);
+          res.json({
+            message: "incorrect Data",
+            user: "",
+            status: false,
+          });
+        }
+      } else {
+        await Booking.updateOne(
+          { pnr_no: fareData.pnr_no },
+          { offerId: null, discount: "0" }
+        );
+        const getBooking = await Booking.findOne({
+          pnr_no: fareData.pnr_no,
+        })
+          .populate({
+            path: "routeId",
+            select: "title",
+          })
+          .populate({
+            path: "pickupId",
+            select: "title",
+          })
+          .populate({
+            path: "dropoffId",
+            select: "title",
+          })
+          .populate({
+            path: "busId",
+            select: "name model_no",
+          })
+          .lean();
+
+        const getPassenger = await Passenger.find({
+          bookingId: getBooking._id,
+        }).lean();
+        res.status(httpStatus.CREATED);
+        res.json({
+          message: "User created successfully.",
+          user: savedUser,
+          booking: getBooking,
+          status: true,
+        });
+      }
+    } else {
+      res.status(httpStatus.CREATED);
+      res.json({
+        message: "User created successfully.",
+        user: savedUser,
+        booking:"",
+        status: true,
+      });
+    }
   } catch (error) {
     next(User.checkDuplicateEmail(error));
   }
