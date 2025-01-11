@@ -4,7 +4,8 @@ const moment = require("moment-timezone");
 const paginateAggregate = require('mongoose-aggregate-paginate-v2');
 const objectIdToTimestamp = require("objectid-to-timestamp");
 const { env, FULLBASEURL } = require("../../config/vars");
-
+var Schema = mongoose.Schema;
+const ObjectId = Schema.ObjectId;
 
 const userSchema = new mongoose.Schema(
   {
@@ -42,10 +43,10 @@ const userSchema = new mongoose.Schema(
     device_type: { type: Number,enum:[1,2], default: 1, index: true }, // 1 === android , 2 === ios
     language: { type: String, enum:["en","ar"], default: "en" },
     defaultBookingId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: [ObjectId],
       ref: "Booking",
-      required: false,
-    }, 
+      default: [],
+    },  
     defaultTime: { type: Date, default: "" },
     isReturn:{ type: Number,enum:[1,2], default: 1, index: true }, // 1 === is return true , 2 === false
     refercode: {

@@ -62,6 +62,7 @@ const bookingSchema = new mongoose.Schema(
         "SCHEDULED",
         "ONBOARDED",
         "EXPIRED",
+        "PROCESSING"
       ],
       default: "SCHEDULED",
     },

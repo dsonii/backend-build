@@ -26,7 +26,7 @@ const passengerSchema = new mongoose.Schema(
   }
 );
 
-PassengerSchema.statics = {
+passengerSchema.statics = {
   transformFormatData(data) {
        const selectableItems = [];
        data.forEach((item) => {

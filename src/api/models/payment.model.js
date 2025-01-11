@@ -185,6 +185,76 @@ PaymentSchema.statics = {
     });
     return selectableItems;
   },
+  formattedDefaultBookingData(data) {
+    const selectableItems = [];
+    data.forEach((item) => {
+      selectableItems.push({
+        //   id: item._id,
+        title: item.title,
+        busId: item.busId,
+        bookingId: item.bookingId,
+        routeId: item.routeId,
+        pickupId: item.pickupId,
+        dropoffId: item.dropoffId,
+        busscheduleId: item.busscheduleId,
+        status: item.type == 0 ? "credit" : "debit",
+        type: item.type,
+        payment_status: item.payment_status,
+        method: item.method,
+        amount: item.is_pass ? item.total_pass_amount : item.amount,
+        is_pass: item.is_pass,
+        no_of_pasess: item.passId ? item.passId.no_of_rides : 0,
+        payment_created: moment(item.createdAt)
+          .tz("Asia/kolkata")
+          .format("DD MMM YYYY"),
+        booking_details: item.bookingId
+          ? this.bookingDetail(item.bookingId)
+          : [],
+        is_booked: true,  
+      });
+    });
+    return selectableItems;
+  },
+  bookingDetail(data) {
+    const selectableItems = [];
+    data.forEach((item) => {
+      selectableItems.push({
+        //   id: item._id,
+        pnr_no: item.pnr_no,
+        seat_nos: _.join(item.seat_nos, ","),
+        travel_status: item.travel_status,
+        booking_date: moment(item.booking_date)
+          .tz("Asia/Kolkata")
+          .format("DD-MM-YYYY"),
+        start_time: item.start_time,
+        start_date: item.start_date,
+        drop_date: item.drop_date,
+        drop_time: item.drop_time,
+        route_name: item.routeId ? item.routeId.title : "-",
+        pickup_name: item.pickupId ? item.pickupId.title : "-",
+        dropoff_title: item.dropoffId ? item.dropoffId.title : "-",
+        bus_detail: item.busId
+          ? {
+              code: item.busId.code,
+              name: item.busId.name,
+              brand: item.busId.brand,
+              model_no: item.busId.model_no,
+              chassis_no: item.busId.chassis_no,
+              reg_no: item.busId.reg_no,
+            }
+          : {},
+
+        // title: item.title,
+        // status: (item.type == 0) ? 'credit' : 'debit',
+        // type: item.type,
+        // payment_status: item.payment_status,
+        // method: item.method,
+        // amount: item.amount,
+        // payment_created: moment(item.createdAt).tz('Asia/kolkata').format('DD MMM YYYY'),
+      });
+    });
+    return selectableItems;
+  },
 };
 
 PaymentSchema.plugin(mongoosePaginate);

@@ -9,7 +9,8 @@ const Ticket = require("../models/ticket.model");
 const mongoose = require("mongoose");
 const moment = require("moment-timezone");
 const HelperCustom = require('../helpers/custom');
-const nanoid = require("nanoid");
+const { nanoid } = require("nanoid");
+const userService = require("../services/userService");
 /**
  * Load user and append to req.
  * @public
@@ -37,6 +38,15 @@ exports.get = async (req, res, next) => {
       })
       .lean();
     UserData = User.formatedSingleData(getuser);
+    let bookingId = getuser.defaultBookingId
+    if (bookingId) {
+      const getBookingDetails = await userService.defaultBookingHistory(
+        req.params.userId,
+        bookingId
+      );
+      UserData.bookings = getBookingDetails;
+    }
+   
     res.json({ status: true, data: UserData });
   } catch (error) {
     next(error);
@@ -55,186 +65,57 @@ exports.loggedIn = (req, res) => res.json(req.user.transform());
  */
 exports.create = async (req, res, next) => {
   try {
+    req.body.places = {home:{address:"", coordinates:[], timing:""},office:{address:"", coordinates:[], timing:""}};
+    if (req.body.time_for_user) {
+      let newDate = new Date();
+      const current_date = moment
+      .utc(newDate.toLocaleDateString())
+      .tz(DEFAULT_TIMEZONE)
+      .format("Y-MM-DD");
+      const currentTime = new Date(`${current_date} ${req.body.time_for_user}`);
+      req.body.defaultTime = currentTime;
+      req.body.places.home.timing = currentTime;
+    }
+    
+    let pickupLocation = req.body.pickup_location[0].location;
+    req.body.places.home.address = pickupLocation.address;
+    req.body.places.home.coordinates = pickupLocation.coordinates;
+
+
+    let dropLocation = req.body.drop_location[0].location;
+    req.body.places.office.address = dropLocation.address;
+    req.body.places.office.coordinates = dropLocation.coordinates;
+    
     const user = new User(req.body);
     const savedUser = await user.save();
     const wallet = new Wallet({
-      refercode: nanoid(15),
+      refercode: Date.now().toString(36) + Math.random().toString(36).substr(2),
       users: savedUser._id,
     });
 
     const savedWallet = await wallet.save();
     
-    const session = await mongoose.startSession();
-    const {
-          busScheduleId,
-          route,
-          bus,
-          pickup_location,
-          drop_location,
-          has_return,
-          seat,
-        } = req.body;
-    if (busScheduleId && route && bus)    {
-      const currentDate = moment().format("YYYY-MM-DD");
-      const datetime = new Date();
-      let current_date = moment(datetime).toDate();
-      let userId = savedUser._id;
-      let walletId = savedWallet._id;
-      let offer_code = "";
-      const passengerdetails = {
-                        fullname: savedUser.firstname+ ' ' +savedUser.lastname,
-                        age: savedUser.age,
-                        gender: savedUser.gender,
-                        seat: seat
-                      };
-      
-      // Start session
-      await session.startTransaction();
-      const seats = fareData.seat_no.replace(/\[|\]/g, "").split(","); // convert string to Array
-      const passengers = seats.length;
-      const walletBalance = await Wallet.findById(walletId);
-      var saveObj = {};
-      var offer_id = null;
-      var attempt = 0;
-      var offer_discount_amount = 0;
-      saveObj = {
-        busscheduleId: fareData.busschedule_id,
-        pnr_no: fareData.pnr_no,
-        routeId: fareData.route_id,
-        pickupId: fareData.pickup_stop_id,
-        dropoffId: fareData.drop_stop_id,
-        busId: fareData.bus_id,
-        offerId: null,
-        userId,
-        seat_nos: seats,
-        distance: fareData.distance,
-        has_return: fareData.has_return === "1" ? false : true,
-        start_time: fareData.pickup_time,
-        start_date: fareData.created_date,
-        drop_time: fareData.drop_time,
-        drop_date: fareData.created_date,
-        passengers,
-        sub_total: fareData.sub_total,
-        final_total_fare: fareData.final_total_fare,
-        discount: "0",
-        tax_amount: fareData.tax_amount,
-        tax: fareData.tax,
-        fee: fareData.fee,
-        ip: req.ip,
-        travel_status: "PROCESSING",
-        booking_date: new Date(
-          fareData.created_date + " " + fareData.pickup_time
-        ),
-        bus_depature_date: new Date(
-          moment(fareData.created_date)
-            .tz("Asia/Kolkata")
-            .format("YYYY-MM-DD")
-        ),
-      };
-
-      if (
-        !(await Booking.exists({
-          pnr_no: fareData.pnr_no,
-        }))
-      ) {
-        // const seat_count
-        const getticket = await Ticket.fetch(fareData.bus_id);
-        saveObj.ticketId = getticket ? getticket._id : null;
-        const getbookingData = await new Booking(saveObj).save();
-        if (getbookingData) {
-          const bookingId = getbookingData._id;
-          const getBooking = await Booking.findOne({
-            pnr_no: fareData.pnr_no,
-          })
-            .populate({
-              path: "routeId",
-              select: "title",
-            })
-            .populate({
-              path: "pickupId",
-              select: "title",
-            })
-            .populate({
-              path: "dropoffId",
-              select: "title",
-            })
-            .populate({
-              path: "busId",
-              select: "name model_no",
-            })
-            .lean();
-
-          const passenger = await Passenger.passengerFormatData(
-            bookingId,
-            fareData.bus_id,
-            userId,
-            passengerDetailsItem
-          );
-          const persistedPassenger = await Passenger.insertMany(passenger);
-          // finish transcation
-          await session.commitTransaction();
-          session.endSession();
-          res.status(httpStatus.CREATED);
-          res.json({
-            message: "User created successfully.",
-            user: savedUser,
-            booking: getBooking,
-            status: true,
-          });
-        } else {
-          res.status(httpStatus.CREATED);
-          res.json({
-            message: "incorrect Data",
-            user: "",
-            status: false,
-          });
-        }
-      } else {
-        await Booking.updateOne(
-          { pnr_no: fareData.pnr_no },
-          { offerId: null, discount: "0" }
-        );
-        const getBooking = await Booking.findOne({
-          pnr_no: fareData.pnr_no,
-        })
-          .populate({
-            path: "routeId",
-            select: "title",
-          })
-          .populate({
-            path: "pickupId",
-            select: "title",
-          })
-          .populate({
-            path: "dropoffId",
-            select: "title",
-          })
-          .populate({
-            path: "busId",
-            select: "name model_no",
-          })
-          .lean();
-
-        const getPassenger = await Passenger.find({
-          bookingId: getBooking._id,
-        }).lean();
-        res.status(httpStatus.CREATED);
-        res.json({
-          message: "User created successfully.",
-          user: savedUser,
-          booking: getBooking,
-          status: true,
-        });
-      }
-    } else {
-      res.status(httpStatus.CREATED);
-      res.json({
-        message: "User created successfully.",
-        user: savedUser,
-        booking:"",
-        status: true,
-      });
+    let getBooking = await userService.saveBookings(req, res, savedUser, savedWallet, false);
+    let update = [];
+    update.push(mongoose.Types.ObjectId(getBooking._id));
+    if (req.body.has_return == true ){
+      let returnGetBooking = await userService.saveBookings(req, res, savedUser, savedWallet, true);
+      update.push(mongoose.Types.ObjectId(returnGetBooking._id));
     }
+    
+    const updateusers = await User.findByIdAndUpdate(
+      savedUser._id,
+      {defaultBookingId: update},
+      {
+        new: true,
+      }
+    );
+    res.status(httpStatus.OK);
+    res.json({
+      status: true,
+      message: "customer created successfully.",
+      data: savedUser,
+    });
   } catch (error) {
     next(User.checkDuplicateEmail(error));
   }
@@ -533,8 +414,9 @@ exports.search = async (req, res, next) => {
  */
 exports.update = async (req, res, next) => {
   try {
-    const { company, customer_code, firstname, lastname, email, country_code, phone, status } = req.body;
-    const update = {
+    const { company, customer_code, firstname, lastname, email, country_code, phone, status, has_return } = req.body;
+    
+    let update = {
       company,
       customer_code,
       firstname,
@@ -543,7 +425,65 @@ exports.update = async (req, res, next) => {
       phone,
       country_code,
       status,
+      has_return,
     };
+    if (req.body.route) {
+      let defaultBookingId = [];
+      req.body.places = {home:{address:"", coordinates:[], timing:""},office:{address:"", coordinates:[], timing:""}};
+      let pickupLocation = req.body.pickup_location[0].location;
+      let dropLocation = req.body.drop_location[0].location;
+      if (req.body.time_for_user) {
+        let newDate = new Date();
+        const current_date = moment
+        .utc(newDate.toLocaleDateString())
+        .tz(DEFAULT_TIMEZONE)
+        .format("Y-MM-DD");
+        const currentTime = new Date(`${current_date} ${req.body.time_for_user}`);
+        req.body.defaultTime = currentTime;
+        req.body.places.home.timing = currentTime;
+        update = {
+          company,
+          customer_code,
+          firstname,
+          lastname,
+          email,
+          phone,
+          country_code,
+          status,
+          has_return,
+          defaultBookingId,
+          places: {
+            home: {
+              address: pickupLocation.address, coordinates: pickupLocation.coordinates, timing: currentTime
+            },
+            office: {
+              address: dropLocation.address, coordinates: dropLocation.coordinates
+            }
+          }
+        };
+      }
+      update = {
+        company,
+        customer_code,
+        firstname,
+        lastname,
+        email,
+        phone,
+        country_code,
+        status,
+        has_return,
+        defaultBookingId,
+        places: {
+          home: {
+            address: pickupLocation.address, coordinates: pickupLocation.coordinates
+          },
+          office: {
+            address: dropLocation.address, coordinates: dropLocation.coordinates
+          }
+        }
+      };
+    }
+
     const updateusers = await User.findByIdAndUpdate(
       req.params.userId,
       update,
@@ -551,6 +491,27 @@ exports.update = async (req, res, next) => {
         new: true,
       }
     );
+    if (req.body.route) {
+      const findUser = await User.findOne({_id: mongoose.Types.ObjectId(req.params.userId)});
+      const findWallet = await Wallet.findOne({users: mongoose.Types.ObjectId(req.params.userId)});
+
+      let getBooking = await userService.saveBookings(req, res, findUser, findWallet, false);
+      let update = [];
+      update.push(mongoose.Types.ObjectId(getBooking._id));
+      if (req.body.has_return == true ){
+        let returnGetBooking = await userService.saveBookings(req, res, findUser, findWallet, true);
+        update.push(mongoose.Types.ObjectId(returnGetBooking._id));
+      }
+      
+      const updateusers = await User.findByIdAndUpdate(
+        req.params.userId,
+        {defaultBookingId: update},
+        {
+          new: true,
+        }
+      );
+    }
+
     res.status(httpStatus.OK);
     res.json({
       status: true,
