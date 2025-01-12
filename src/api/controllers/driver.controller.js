@@ -485,6 +485,14 @@ exports.update = async (req, res, next) => {
   try {
     const driverexists = await Driver.findById(req.params.driverId).exec();
     const FolderName = process.env.S3_BUCKET_DRIVERDOC;
+    let police_vertification_expiry_date = req.body.police_vertification_expiry_date;
+    let licence_expiry_date = req.body.licence_expiry_date;
+    if (req.body.police_vertification_expiry_date == "-"){
+      police_vertification_expiry_date = "";
+    }
+    if (req.body.licence_expiry_date == "-"){
+      licence_expiry_date = "";
+    }
     const objUpdate = {
       adminId: req.body.adminId,
       firstname: req.body.firstname,
@@ -495,10 +503,14 @@ exports.update = async (req, res, next) => {
       status: req.body.status,
       type: req.body.type,
       national_id: req.body.national_id,
-      licence_expiry_date: req.body.licence_expiry_date,
-      police_vertification_expiry_date: req.body.police_vertification_expiry_date,
+      picture: req.body.picture,
+      document_licence: req.body.document_licence,
+      document_national_icard: req.body.document_national_icard,
+      document_police_vertification: req.body.document_police_vertification,
+      police_vertification_expiry_date: police_vertification_expiry_date,
+      licence_expiry_date: licence_expiry_date,
     };
-
+   
     const isProductionS3 = await Setting.gets3();
 
     if (Driver.isValidBase64(req.body.picture)) {
@@ -510,7 +522,7 @@ exports.update = async (req, res, next) => {
           process.env.S3_BUCKET_DRIVER_PROFILE
         );
       } else {
-        objDriver.picture = await uploadLocal(picture, FolderName);
+        objUpdate.picture = await uploadLocal(req.body.picture, FolderName);
       }
     }
 
@@ -523,7 +535,7 @@ exports.update = async (req, res, next) => {
           FolderName
         );
       } else {
-        objDriver.document_licence = await uploadLocal(
+        objUpdate.document_licence = await uploadLocal(
           req.body.document_licence,
           FolderName
         );
@@ -539,7 +551,7 @@ exports.update = async (req, res, next) => {
           FolderName
         );
       } else {
-        objDriver.document_national_icard = await uploadLocal(
+        objUpdate.document_national_icard = await uploadLocal(
           req.body.document_national_icard,
           FolderName
         );
@@ -558,7 +570,7 @@ exports.update = async (req, res, next) => {
           FolderName
         );
       } else {
-        objDriver.document_police_vertification = await uploadLocal(
+        objUpdate.document_police_vertification = await uploadLocal(
           req.body.document_police_vertification,
           FolderName
         );

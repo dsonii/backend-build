@@ -29,6 +29,11 @@ router
 
 
 router
+  .route('/search-location')
+  .get(getAuth('stop.view', 'master.admin'), controller.searchLocation);  
+
+
+router
   .route('/:locationId')
   .get(getAuth('stop.edit', 'master.admin'), controller.get)
   /**

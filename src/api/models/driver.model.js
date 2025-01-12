@@ -67,6 +67,11 @@ const driverSchema = new mongoose.Schema(
       trim: true,
       default: "default.jpg",
     },
+    document_national_icard:{
+      type: String,
+      trim: true,
+      default: "default.jpg",
+    },
     language: { type: String, enum:["en","ar"], default: "en" },
     document_licence: { type: String, default: "default.jpg" },
     document_adhar_card: {
@@ -129,6 +134,7 @@ driverSchema.method({
       "document_police_vertification",
       "document_adhar_card",
       "document_licence",
+      "document_national_icard",
       "status",
       "duty_status",
       "licence_expiry_date",
@@ -295,6 +301,11 @@ driverSchema.statics = {
           )
             ? item.document_police_vertification
             : `${FULLBASEURL}` + item.document_police_vertification,
+            document_national_icard: this.isValidURL(
+              item.document_national_icard
+            )
+              ? item.document_national_icard
+              : `${FULLBASEURL}` + item.document_national_icard,
           status: item.status == true ? "Active" : "Inactive",
           createdAt: moment
             .utc(item.createdAt)

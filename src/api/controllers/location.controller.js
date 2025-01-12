@@ -264,6 +264,24 @@ exports.search = async (req, res, next) => {
   }
 };
 
+
+exports.searchLocation = async (req, res, next) => {
+  try {
+    const { search, type } = req.query;
+    const condition = {
+          title: { $regex: `(\s+${search}|^${search})`, $options: "i" }
+        };
+    const result = await Location.find(condition).lean();
+    console.log("result", result);
+    res.json({
+      total_count: result.length,
+      items: Location.formatLocation(result),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 /**
  * Delete location
  * @public

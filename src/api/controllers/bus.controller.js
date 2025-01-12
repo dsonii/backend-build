@@ -5,7 +5,7 @@ const Bus = require("../models/bus.model");
 const Route = require("../models/route.model");
 const busSchedule = require("../models/busSchedule.model");
 const Bus_galleries = require("../models/busGallaries.model");
-const {imageDelete,imageUpload } = require("../services/uploaderService");
+const {imageDelete,imageUpload, uploadLocal, deleteLocal,} = require("../services/uploaderService");
 const { VARIANT_ALSO_NEGOTIATES } = require("http-status");
 
 const uuidv4 = require("uuid/v4");
@@ -313,53 +313,80 @@ exports.create = async (req, res, next) => {
       certificate_fitness_expiry_date,
       certificate_permit_expiry_date,
     };
-    if (picture) {
-      objBus.picture = await imageUpload(
-        picture,
-        `${uuidv4()}`,
-        FolderName
-      );
-    }
 
-    if (certificate_registration) {
-      objBus.certificate_registration = await imageUpload(
-        certificate_registration,
-        `${uuidv4()}`,
-        FolderName
-      );
-    }
+    const isProductionS3 = await Setting.gets3();
 
-    if (certificate_pollution) {
-      objBus.certificate_pollution = await imageUpload(
-        certificate_pollution,
-        `${uuidv4()}`,
-        FolderName
-      );
+    if (picture && (await Setting.isValidBase64(picture))) {
+      if (isProductionS3.is_production) {
+        objBus.picture = await imageUpload(
+          picture,
+          `${uuidv4()}`,
+          FolderName
+        );
+      } else {
+        objBus.picture = await uploadLocal(picture, FolderName);
+      }
     }
+      
+      if (certificate_registration && (await Setting.isValidBase64(certificate_registration))) {
+        if (isProductionS3.is_production) {
+          objBus.certificate_registration = await imageUpload(
+            certificate_registration,
+            `${uuidv4()}`,
+            FolderName
+          );
+        } else {
+          objBus.certificate_registration = await uploadLocal(certificate_registration, FolderName);
+        }
+      }
+    
+      if (certificate_pollution && (await Setting.isValidBase64(certificate_pollution))) {
+        if (isProductionS3.is_production) {
+          objBus.certificate_pollution = await imageUpload(
+            certificate_pollution,
+            `${uuidv4()}`,
+            FolderName
+          );
+        } else {
+          objBus.certificate_pollution = await uploadLocal(certificate_pollution, FolderName);
+        }
+      }
 
-    if (certificate_insurance) {
-      objBus.certificate_insurance = await imageUpload(
-        certificate_insurance,
-        `${uuidv4()}`,
-        FolderName
-      );
-    }
+      if (certificate_insurance && (await Setting.isValidBase64(certificate_insurance))) {
+        if (isProductionS3.is_production) {
+          objBus.certificate_insurance = await imageUpload(
+            certificate_insurance,
+            `${uuidv4()}`,
+            FolderName
+          );
+        } else {
+          objBus.certificate_insurance = await uploadLocal(certificate_insurance, FolderName);
+        }
+      }
 
-    if (certificate_fitness) {
-      objBus.certificate_fitness = await imageUpload(
-        certificate_fitness,
-        `${uuidv4()}`,
-        FolderName
-      );
-    }
-
-    if (certificate_permit) {
-      objBus.certificate_permit = await imageUpload(
-        certificate_permit,
-        `${uuidv4()}`,
-        FolderName
-      );
-    }
+      if (certificate_fitness && (await Setting.isValidBase64(certificate_fitness))) {
+        if (isProductionS3.is_production) {
+          objBus.certificate_fitness = await imageUpload(
+            certificate_fitness,
+            `${uuidv4()}`,
+            FolderName
+          );
+        } else {
+          objBus.certificate_fitness = await uploadLocal(certificate_fitness, FolderName);
+        }
+      }
+   
+      if (certificate_permit && (await Setting.isValidBase64(certificate_permit))) {
+        if (isProductionS3.is_production) {
+          objBus.certificate_permit = await imageUpload(
+            certificate_permit,
+            `${uuidv4()}`,
+            FolderName
+          );
+        } else {
+          objBus.certificate_permit = await uploadLocal(certificate_permit, FolderName);
+        }
+      }
 
     const bus = new Bus(objBus);
     const savedBus = await bus.save();

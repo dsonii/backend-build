@@ -65,7 +65,7 @@ SessionSchema.statics.generateToken = function(userId, walletId, expiresIn) {
         walletId,
         userId
     }, process.env.JWT_SECRET, {
-        expiresIn: expiresIn // "1h"
+        expiresIn: '1h' // "1h"
     });
     return jwtToken;
 };
@@ -73,7 +73,7 @@ SessionSchema.statics.generateDriverToken = function(userId, expiresIn) {
     let jwtToken = jwt.sign({
         userId
     }, process.env.JWT_SECRET, {
-        expiresIn: expiresIn // "1h"
+        expiresIn: '1h' // "1h"
     });
     return jwtToken;
 };

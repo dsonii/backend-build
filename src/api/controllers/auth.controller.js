@@ -37,7 +37,7 @@ function generateTokenResponse(admin, accessToken) {
   const refreshToken = RefreshToken.generate(admin).token;
   const expiresIn = moment()
     .local()
-    .add(jwtExpirationInterval, "minutes")
+    .add(24, "hours")
     .unix();
   console.log(
     "expiresIn",
