@@ -1,12 +1,12 @@
 const httpStatus = require("http-status");
 const Location = require("../models/location.model");
-const { imageDelete, imageUpload } = require("../services/uploaderService");
+const { imageDelete, imageUpload, uploadLocal, deleteLocal} = require("../services/uploaderService");
 const uuidv4 = require("uuid/v4");
 const { omit } = require("lodash");
 
 const Route = require("../models/route.model");
 const RouteStop = require("../models/routeStop.model");
-
+const Setting = require("../models/setting.model");
 
 
 /**
@@ -101,15 +101,25 @@ exports.create = async (req, res, next) => {
 	  integer_id:lastIntegerId
     };
     let pictures = [];
+    let abUl = "";
+    let s3Dataurl = "";
+    const isProductionS3 = await Setting.gets3();
     if (files && files.length > 0) {
-      files.forEach(async (file) => {
-        const s3Dataurl = await imageUpload(
-          file.path,
-          `${uuidv4()}`,
-          FolderName
-        );
-        pictures.push(s3Dataurl);
-      });
+      if (isProductionS3.is_production) {
+        for( let i = 0; i < files.length; i++ ) {
+          s3Dataurl = await imageUpload(
+            files[i].path.path,
+            `${uuidv4()}`,
+            FolderName
+          );
+          pictures.push(s3Dataurl);     
+       }
+      } else {
+        for( let i = 0; i < files.length; i++ ) {
+          abUl = await uploadLocal(files[i].path, FolderName);  
+          pictures.push(abUl);     
+       }
+      }
     }
     locationObject.pictures = pictures;
 
@@ -145,19 +155,28 @@ exports.update = async (req, res, next) => {
       type: type,
       status: status == "1",
     }
+    const isProductionS3 = await Setting.gets3();
     let pictures = [];
+    let abUl = "";
+    let s3Dataurl = "";
     if (files && files.length > 0) {
-      files.forEach(async (file) => {
-        const s3Dataurl = await imageUpload(
-          file.path,
-          `${uuidv4()}`,
-          FolderName
-        );
-        pictures.push(s3Dataurl);
-      });
+      if (isProductionS3.is_production) {
+        for( let i = 0; i < files.length; i++ ) {
+          s3Dataurl = await imageUpload(
+            files[i].path.path,
+            `${uuidv4()}`,
+            FolderName
+          );
+          pictures.push(s3Dataurl);     
+       }
+      } else {
+        for( let i = 0; i < files.length; i++ ) {
+          abUl = await uploadLocal(files[i].path, FolderName);  
+          pictures.push(abUl);     
+       }
+      }
+      updateObj.pictures = pictures;
     }
-    updateObj.pictures = pictures;
-
     const updatelocations = await Location.findByIdAndUpdate(
       req.params.locationId,
       {
@@ -168,9 +187,10 @@ exports.update = async (req, res, next) => {
       }
     );
     const transformedUsers = updatelocations.transform();
+    res.status(httpStatus.CREATED);
     res.json({
       message: "Stop updated successfully.",
-      bustype: transformedUsers,
+      location: transformedUsers,
       status: true,
     });
   } catch (error) {

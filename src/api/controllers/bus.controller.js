@@ -5,6 +5,7 @@ const Bus = require("../models/bus.model");
 const Route = require("../models/route.model");
 const busSchedule = require("../models/busSchedule.model");
 const Bus_galleries = require("../models/busGallaries.model");
+const Setting = require("../models/setting.model");
 const {imageDelete,imageUpload, uploadLocal, deleteLocal,} = require("../services/uploaderService");
 const { VARIANT_ALSO_NEGOTIATES } = require("http-status");
 
@@ -411,6 +412,23 @@ exports.update = async (req, res, next) => {
   try {
     const busexists = await Bus.findById(req.params.busId).exec();
     const FolderName = process.env.S3_BUCKET_BUS;
+    const isProductionS3 = await Setting.gets3();
+    let certificate_pollution_expiry_date = req.body.certificate_pollution_expiry_date;
+    let certificate_insurance_expiry_date = req.body.certificate_insurance_expiry_date;
+    let certificate_fitness_expiry_date = req.body.certificate_fitness_expiry_date;
+    let certificate_permit_expiry_date = req.body.certificate_permit_expiry_date;
+    if (req.body.certificate_pollution_expiry_date == "-"){
+      certificate_pollution_expiry_date = "";
+    }
+    if (req.body.certificate_insurance_expiry_date == "-"){
+      certificate_insurance_expiry_date = "";
+    }
+    if (req.body.certificate_permit_expiry_date == "-"){
+      certificate_permit_expiry_date = "";
+    }
+    if (req.body.certificate_fitness_expiry_date == "-"){
+      certificate_fitness_expiry_date = "";
+    }
     const objUpdate = {
       adminId: req.body.adminId,
       bustypeId: req.body.bustypeId,
@@ -420,68 +438,108 @@ exports.update = async (req, res, next) => {
       status: req.body.status,
       brand:req.body.brand,
       model_no:req.body.model_no,
-      certificate_pollution_expiry_date:req.body.certificate_pollution_expiry_date,
-      certificate_insurance_expiry_date:req.body.certificate_insurance_expiry_date,
-      certificate_fitness_expiry_date:req.body.certificate_fitness_expiry_date,
-      certificate_permit_expiry_date:req.body.certificate_permit_expiry_date,
+      certificate_pollution_expiry_date:certificate_pollution_expiry_date,
+      certificate_insurance_expiry_date:certificate_insurance_expiry_date,
+      certificate_fitness_expiry_date:certificate_fitness_expiry_date,
+      certificate_permit_expiry_date:certificate_permit_expiry_date,
       chassis_no:req.body.chassis_no,
       amenities:req.body.amenities,
     };
-
+    
+    
     if (Bus.isValidBase64(req.body.picture)) {
-      await imageDelete(busexists.picture, FolderName);
-      objUpdate.picture = await imageUpload(
-        req.body.picture,
-        `${uuidv4()}`,
-        FolderName
-      );
+      if ((await Setting.isValidBase64(req.body.picture))) {
+        if (isProductionS3.is_production) {
+          await imageDelete(busexists.picture, FolderName);
+          objUpdate.picture = await imageUpload(
+            req.body.picture,
+            `${uuidv4()}`,
+            FolderName
+          );
+        } else {
+          objUpdate.picture = await uploadLocal(req.body.picture, FolderName);
+        }
+      }
     }
-
+   
     if (Bus.isValidBase64(req.body.certificate_registration)) {
-      await imageDelete(busexists.certificate_registration, FolderName);
-      objUpdate.certificate_registration = await imageUpload(
-        req.body.certificate_registration,
-        `${uuidv4()}`,
-        FolderName
-      );
+      if ((await Setting.isValidBase64(req.body.certificate_registration))) {
+        if (isProductionS3.is_production) {
+          await imageDelete(busexists.certificate_registration, FolderName);
+          objUpdate.certificate_registration = await imageUpload(
+            req.body.certificate_registration,
+            `${uuidv4()}`,
+            FolderName
+          );
+        } else {
+          objUpdate.certificate_registration = await uploadLocal(req.body.certificate_registration, FolderName);
+        }
+      }
     }
 
     if (Bus.isValidBase64(req.body.certificate_pollution)) {
-      await imageDelete(busexists.certificate_pollution, FolderName);
-      objUpdate.certificate_pollution = await imageUpload(
-        req.body.certificate_pollution,
-        `${uuidv4()}`,
-        FolderName
-      );
+      
+      if ((await Setting.isValidBase64(req.body.certificate_pollution))) {
+        if (isProductionS3.is_production) {
+          await imageDelete(busexists.certificate_pollution, FolderName);
+          objUpdate.certificate_pollution = await imageUpload(
+            req.body.certificate_pollution,
+            `${uuidv4()}`,
+            FolderName
+          );
+        } else {
+          objUpdate.certificate_pollution = await uploadLocal(req.body.certificate_pollution, FolderName);
+        }
+      }
     }
 
     if (Bus.isValidBase64(req.body.certificate_insurance)) {
-      await imageDelete(busexists.certificate_insurance, FolderName);
-      objUpdate.certificate_insurance = await imageUpload(
-        req.body.certificate_insurance,
-        `${uuidv4()}`,
-        FolderName
-      );
+      
+      if ((await Setting.isValidBase64(req.body.certificate_insurance))) {
+        if (isProductionS3.is_production) {
+          await imageDelete(busexists.certificate_insurance, FolderName);
+          objUpdate.certificate_insurance = await imageUpload(
+            req.body.certificate_insurance,
+            `${uuidv4()}`,
+            FolderName
+          );
+        } else {
+          objUpdate.certificate_insurance = await uploadLocal(req.body.certificate_insurance, FolderName);
+        }
+      }
     }
 
     if (Bus.isValidBase64(req.body.certificate_fitness)) {
-      await imageDelete(busexists.certificate_fitness, FolderName);
-      objUpdate.certificate_fitness = await imageUpload(
-        req.body.certificate_fitness,
-        `${uuidv4()}`,
-        FolderName
-      );
+      
+      if ((await Setting.isValidBase64(req.body.certificate_fitness))) {
+        if (isProductionS3.is_production) {
+          await imageDelete(busexists.certificate_fitness, FolderName);
+          objUpdate.certificate_fitness = await imageUpload(
+            req.body.certificate_fitness,
+            `${uuidv4()}`,
+            FolderName
+          );
+        } else {
+          objUpdate.certificate_fitness = await uploadLocal(req.body.certificate_fitness, FolderName);
+        }
+      }
     }
 
     if (Bus.isValidBase64(req.body.certificate_permit)) {
-      await imageDelete(busexists.certificate_permit, FolderName);
-      objUpdate.certificate_permit = await imageUpload(
-        req.body.certificate_permit,
-        `${uuidv4()}`,
-        FolderName
-      );
+      
+      if ((await Setting.isValidBase64(req.body.certificate_permit))) {
+        if (isProductionS3.is_production) {
+          await imageDelete(busexists.certificate_permit, FolderName);
+          objUpdate.certificate_permit = await imageUpload(
+            req.body.certificate_permit,
+            `${uuidv4()}`,
+            FolderName
+          );
+        } else {
+          objUpdate.certificate_permit = await uploadLocal(req.body.certificate_permit, FolderName);
+        }
+      }
     }
-
     const updatebus = await Bus.findByIdAndUpdate(
       req.params.busId,
       {
