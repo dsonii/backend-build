@@ -7,7 +7,8 @@ const { omit } = require("lodash");
 const Route = require("../models/route.model");
 const RouteStop = require("../models/routeStop.model");
 const Setting = require("../models/setting.model");
-
+const fs = require("fs").promises;
+const path = require("path");
 
 /**
  * check stops with the title.
@@ -59,7 +60,29 @@ exports.load = async (req, res) => {
  */
 exports.get = async (req, res) => {
   try {
+    const FolderName = process.env.S3_BUCKET_LOCATION;
     const location = await Location.findById(req.params.locationId);
+    if (location.pictures) {
+      for (var i=0; i<location.pictures.length;i++){
+        
+        let pictures = location.pictures[i];
+        let picturesResult = pictures.replace(`${process.env.FULL_BASEURL}`, '');
+        console.log(picturesResult);
+        let filePath = path.join(
+          __dirname,
+          "../../../",
+          picturesResult
+        );
+        if (fs.access(filePath)) {
+          var bitmap = await fs.readFile(filePath, 'base64');
+          var tmp  = bitmap.toString().replace(/[“”‘’]/g,'');
+          let base64 = new Buffer(tmp).toString('base64');
+          location.pictures[i] = base64;
+        }
+        console.log(location.pictures[i]);
+      }
+    }
+
     res.status(httpStatus.OK);
     res.json({
       message: "stop fetched successfully.",

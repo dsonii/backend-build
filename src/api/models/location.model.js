@@ -116,6 +116,7 @@ locationSchema.statics = {
       integer_id:item.integer_id,
       title: item.title,
       type: item.type,
+      files: item.pictures,
       address: item.location.address,
       lat: item.location.coordinates[1],
       lng: item.location.coordinates[0],
