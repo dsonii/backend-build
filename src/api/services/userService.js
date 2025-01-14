@@ -122,11 +122,9 @@ const { nanoid } = require("nanoid");
             fee: fareData.fee,
             ip: req.ip,
             travel_status: "PROCESSING",
-            booking_date: new Date(
-              fareData.created_date + " " + fareData.pickup_time
-            ),
+            booking_date: new Date(current_date),
             bus_depature_date: new Date(
-              moment(fareData.created_date)
+              moment(current_date)
                 .tz("Asia/Kolkata")
                 .format("YYYY-MM-DD")
             ),
