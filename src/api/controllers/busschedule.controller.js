@@ -398,7 +398,7 @@ exports.create = async (req, res) => {
       res.status(httpStatus.CREATED);
       return res.json({
         status: true,
-        message: "bus schedule create successfully",
+        message: "Vehicle schedule create successfully",
       });
     }
   } catch (error) {
@@ -464,7 +464,7 @@ exports.update = async (req, res) => {
         res.status(httpStatus.CREATED);
         return res.json({
           status: true,
-          message: "bus schedule updated successfully",
+          message: "Vehicle schedule updated successfully",
         });
       }
     } else {
@@ -528,7 +528,7 @@ exports.remove = async (req, res) => {
       });
       res.status(httpStatus.OK).json({
         status: true,
-        message: "Bus Schedule deleted successfully.",
+        message: "Vehicle Schedule deleted successfully.",
       });
     })
     .catch(e => next(e));

@@ -53,7 +53,7 @@ exports.isRegistrationExists = async (req, res, next) => {
     const bus = await Bus.find({status:true}).populate("bustypeId");
     res.status(httpStatus.OK);
     res.json({
-      message: 'Bus Type load data.',
+      message: 'Vehicle Type load data.',
       data: Bus.transformOptions(bus),
       status: true,
     });
@@ -75,7 +75,7 @@ exports.isRegistrationExists = async (req, res, next) => {
     console.log("getBuses",getBuses);
     res.status(httpStatus.OK);
     res.json({
-      message: 'Bus Type load data.',
+      message: 'Vehicle Type load data.',
       data: Bus.transformOptions(getBuses),
       status: true,
     });
@@ -395,7 +395,7 @@ exports.create = async (req, res, next) => {
 
     res.status(httpStatus.CREATED);
     return res.json({
-      message: 'Bus created successfully.',
+      message: 'Vehicle created successfully.',
       bus: savedBus,
       status: true,
     });
@@ -554,7 +554,7 @@ exports.update = async (req, res, next) => {
     res.status(httpStatus.OK);
     res.json({
       status: true,
-      message: "Bus updated successfully.",
+      message: "Vehicle updated successfully.",
       data:transformedBus,
     });
   } catch (error) {
@@ -800,7 +800,7 @@ exports.remove = async (req, res, next) => {
         if(deleteBus){
           res.status(httpStatus.OK).json({
                  status: true,
-                 message: 'Bus deleted successfully.',
+                 message: 'Vehicle deleted successfully.',
             })
         }
     }

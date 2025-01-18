@@ -14,7 +14,7 @@ const Bus = require("../models/bus.model");
     const bustype = await BusType.find({status:true});
     res.status(httpStatus.OK);
     res.json({
-      message: 'Bus Type load data.',
+      message: 'Vehicle Type load data.',
       data: BusType.transformOptions(bustype),
       status: true,
     });
@@ -33,7 +33,7 @@ const Bus = require("../models/bus.model");
     const bustype = await BusType.findById(req.params.bustypeId);
     res.status(httpStatus.OK);
     res.json({
-      message: 'Bus Type successfully.',
+      message: 'Vehicle Type successfully.',
       data: bustype.transform(),
       status: true,
     });
@@ -54,7 +54,7 @@ const Bus = require("../models/bus.model");
     const bustype = new BusType(req.body);
     const savedBusType = await bustype.save();
     res.status(httpStatus.CREATED);
-    res.json({ message: 'Bus type created successfully.', bustype: savedBusType.transform(), status: true });
+    res.json({ message: 'Vehicle type created successfully.', bustype: savedBusType.transform(), status: true });
   } catch (error) {
     next(error);
   }
@@ -127,7 +127,7 @@ const Bus = require("../models/bus.model");
       new: true,
     });
     const transformedBusType = updatebustype.transform();
-    res.json({ message: 'Bus type updated successfully.', bustype:transformedBusType,status:true});
+    res.json({ message: 'Vehicle type updated successfully.', bustype:transformedBusType,status:true});
   } catch (error) {
     next(error);
   }
@@ -143,7 +143,7 @@ exports.remove = (req, res, next) => {
     if (result) {
       res.status(httpStatus.OK).json({
         status: false,
-        message: `Please delete bus name ${result.name} first.`,
+        message: `Please delete vehicle name ${result.name} first.`,
       });
     } else {
       BusType.deleteOne({
@@ -152,7 +152,7 @@ exports.remove = (req, res, next) => {
         .then(() =>
           res.status(httpStatus.OK).json({
             status: true,
-            message: "Bus type deleted successfully.",
+            message: "Vehicle type deleted successfully.",
           })
         )
         .catch(e => next(e));

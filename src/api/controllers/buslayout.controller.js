@@ -17,7 +17,7 @@ const mongoose = require("mongoose");
     const buslayout = await BusLayout.find({status:true});
     res.status(httpStatus.OK);
     res.json({
-      message: 'Bus Layout load data.',
+      message: 'Vehicle Layout load data.',
       data: BusLayout.transformOptions(buslayout),
       status: true,
     });
@@ -36,7 +36,7 @@ const mongoose = require("mongoose");
     const buslayout = await BusLayout.findById(req.params.buslayoutId);
     res.status(httpStatus.OK);
     res.json({
-      message: 'Bus Layout successfully.',
+      message: 'Vehicle Layout successfully.',
       data: buslayout.transform(),
       status: true,
     });
@@ -139,7 +139,7 @@ exports.searchSeat = async (req, res) => {
     const buslayout = new BusLayout(req.body);
     const savedBusLayout = await buslayout.save();
     res.status(httpStatus.CREATED);
-    res.json({ message: 'Bus layout created successfully.', buslayout: savedBusLayout.transform(), status: true });
+    res.json({ message: 'Vehicle layout created successfully.', buslayout: savedBusLayout.transform(), status: true });
   } catch (error) {
     next(error);
   }
@@ -214,7 +214,7 @@ exports.searchSeat = async (req, res) => {
       new: true,
     });
     const transformedBusLayout = updatebuslayout.transform();
-    res.json({ message: 'Bus layout updated successfully.', buslayout:transformedBusLayout,status:true});
+    res.json({ message: 'Vehicle layout updated successfully.', buslayout:transformedBusLayout,status:true});
   } catch (error) {
     next(error);
   }
@@ -232,7 +232,7 @@ exports.searchSeat = async (req, res) => {
       if (result) {
         res.status(httpStatus.OK).json({
           status: false,
-          message: `Please delete bus name ${result.name} first.`,
+          message: `Please delete vehicle name ${result.name} first.`,
         });
       } else {
         BusLayout.deleteOne({
@@ -241,7 +241,7 @@ exports.searchSeat = async (req, res) => {
           .then(() =>
             res.status(httpStatus.OK).json({
               status: true,
-              message: "Bus layout deleted successfully.",
+              message: "Vehicle layout deleted successfully.",
             })
           )
           .catch(e => next(e));

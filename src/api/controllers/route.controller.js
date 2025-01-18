@@ -541,7 +541,7 @@ exports.remove = (req, res, next) => {
       if (result) {
         res.status(httpStatus.OK).json({
           status: false,
-          message: "Delete bus schedule first.",
+          message: "Delete vehicle schedule first.",
         });
       }
     })
