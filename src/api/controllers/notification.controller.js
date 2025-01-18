@@ -110,7 +110,7 @@ exports.create = async (req, res, next) => {
         if (payload.to === "to_all" && payload.user_type === 'customer') {
 
             if (payload.schedule === "immediately") {
-                const time = moment().tz(DEFAULT_TIMEZONE).add(1, 'minutes').format("HH:mm");
+                const time = moment().tz(DEFAULT_TIMEZONE).add(1, 'minutes').format("Y-MM-DD HH:mm");
                 const days = [moment().tz(DEFAULT_TIMEZONE).day()];
 
                 payload.time = time;
