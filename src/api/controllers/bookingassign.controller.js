@@ -47,7 +47,7 @@ exports.create = async (req, res, next) => {
         busScheduleId: route.id,
         routeId: route.routeId,
         driverId: driver ? driver.id : null,
-        assistantId: assistant ? assistant.id : null, //await BookingAssign.filterAssistant(assistant),
+        assistantId: null, //await BookingAssign.filterAssistant(assistant),
         dates,
         adminId,
         location: {
@@ -184,20 +184,7 @@ exports.list = async (req, res, next) => {
       {
         $unwind: "$driver",
       },
-      {
-        $lookup: {
-          from: "drivers",
-          localField: "assistantId",
-          foreignField: "_id",
-          //   let: { assistantId: "$assistantId" },
-          //   pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$assistantId"] } } }],
-          as: "assistant",
-        },
-      },
-      {
-        $unwind: "$assistant",
-      },
-	  {
+	    {
         $lookup: {
           from: "bus_schedules",
           localField: "busScheduleId",
@@ -223,7 +210,7 @@ exports.list = async (req, res, next) => {
         $project: {
           _id: 0,
           ids: "$_id",
-		  departure_time: { $ifNull: ["$bus_schedule.departure_time", ""] },
+		      departure_time: { $ifNull: ["$bus_schedule.departure_time", ""] },
           arrival_time: { $ifNull: ["$bus_schedule.arrival_time", ""] },
           routeId: { $ifNull: ["$route._id", ""] },
           route_name: { $ifNull: ["$route.title", ""] },
@@ -265,47 +252,13 @@ exports.list = async (req, res, next) => {
               },
             ],
           },
-		  dates: 1,
-          assistantId: {
-            $ifNull: [
-              {
-                $concat: ["$assistant.firstname", " ", "$assistant.lastname"],
-              },
-              "",
-            ],
-          },
-		  assistant_phone: { $ifNull: [{$concat:["+","$assistant.country_code","","$assistant.phone"]}, ""] },
-          assistant_picture: {
-            $cond: [
-              {
-                $regexMatch: {
-                  input: "$assistant.picture",
-                  regex: /^(http|https):\/\//,
-                },
-              },
-              "$assistant.picture",
-              {
-                $cond: [
-                  {
-                    $regexMatch: {
-                      input: "$assistant.picture",
-                      regex: /^(default):\/\//,
-                    },
-                  },
-                  `${process.env.FULL_BASEURL}public/drivers/profiles/default.jpg`,
-                  {
-                    $concat: [
-                      `${process.env.FULL_BASEURL}public/drivers/profiles/`,
-                      "$assistant.picture",
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
+          dates: 1,
+          assistantId: null,
+          assistant_phone: null,
+          assistant_picture: null,
           trip_status: 1,
           location: 1,
-		  createdAt:1,
+          createdAt:1,
         },
       },
     ]);

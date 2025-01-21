@@ -178,7 +178,7 @@ exports.update = async (req, res, next) => {
       city: city,
       state:state,
       type: type,
-      status: status == "1",
+      status: status == "true",
     }
     const isProductionS3 = await Setting.gets3();
     let pictures = [];
