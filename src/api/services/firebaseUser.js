@@ -44,7 +44,7 @@ firebaseUser.sendMulticastNotification = async function (payload) {
       },
     };
 
-    return await initializedApp.messaging().sendMulticast(message);
+    return await initializedApp.messaging.sendMulticast(message);
   } catch (err) {
     console.log("err", err);
   }
@@ -65,7 +65,7 @@ firebaseUser.sendSingleMessage = async function (payload) {
       },
     };
 
-    return initializedApp.messaging().sendToDevice(payload.token,message);
+    return initializedApp.messaging.send(payload.token,message);
   } catch (err) {
     console.log("err", err);
   }

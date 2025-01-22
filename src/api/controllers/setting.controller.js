@@ -270,12 +270,16 @@ exports.updateNotificationSetting = async (req, res, next) => {
         "../../api/services/files",
         firebaseFile.name
       );
+      console.log("helloooooo");
+      await firebaseFile.mv(uploadPath);
       let firebaseRawdata = fs.readFileSync(uploadPath);
+      console.log(firebaseRawdata);
+      
       settingObject.notifications.firebase_credential =
         JSON.parse(firebaseRawdata);
 
       if (settingexists && settingexists.firebase_key != "") {
-        await firebaseFile.mv(uploadPath);
+        // await firebaseFile.mv(uploadPath);
         settingObject.notifications.firebase_key = firebaseFile.name;
       } else {
         //settingObject.notifications.firebase_key = await fileUpload(
@@ -283,7 +287,6 @@ exports.updateNotificationSetting = async (req, res, next) => {
         //  uuidv4(),
         //  FolderName
         //);
-        await firebaseFile.mv(uploadPath);
         settingObject.notifications.firebase_key = firebaseFile.name;
       }
     }
