@@ -151,13 +151,23 @@ exports.create = async (req, res, next) => {
                             if (getUser && getUser.device_token) {
                                 const title = scheduledNotification.notification.title;
                                 const body = scheduledNotification.notification.body;
-                                const payload ={
-                                    token:getUser.device_token,
-                                    title,
-                                    body,
-                                    picture:scheduledNotification.notification.picture
-                                }
-
+                                // const payload ={
+                                //     token:getUser.device_token,
+                                //     title,
+                                //     body,
+                                //     picture:scheduledNotification.notification.picture
+                                // }
+                                const payload = {
+                                    notification: {
+                                        title: title,
+                                        body: body,
+                                    },
+                                    data: {
+                                        title: title,
+                                    },
+                                    token: getUser.device_token
+                                };
+                            
                                 await firebaseUser.sendSingleMessage(payload);
                            }
               
