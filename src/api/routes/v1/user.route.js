@@ -17,7 +17,9 @@ router.route('/wallet-histories').get(getAuth('customer.wallet.history.view', 'm
 
 router.route('/q').get(getAuth('customer.view', 'master.admin'), controller.search);
 
-router
+router.route('/is-exists').post(getAuth('customer.view', 'master.admin'), controller.isExists);
+
+  router
   .route('/:userId')
   .get(getAuth('customer.edit', 'master.admin'), controller.get)
   /**

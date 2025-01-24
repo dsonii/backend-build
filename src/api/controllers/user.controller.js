@@ -408,6 +408,33 @@ exports.search = async (req, res, next) => {
   }
 };
 
+exports.isExists = async (req, res, next) => {
+  try {
+    let result = 0;
+    const { phone, id } = req.body;
+    
+    if (id != "") {
+      result = await User.countDocuments({_id: { $ne: mongoose.Types.ObjectId(id) },'phone':phone, 'is_deleted': false }).lean();
+    } else {
+      result = await User.countDocuments({'phone':phone, 'is_deleted': false }).lean();
+    }
+    
+    if (result && result >= 1) {
+      res.status(httpStatus.OK);
+      res.json({
+        status: false,
+      });
+    } else {
+      res.status(httpStatus.OK);
+      res.json({
+        status: true,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 /**
  * Update existing user
  * @public

@@ -771,7 +771,7 @@ exports.remove = async (req, res, next) => {
     if(await busSchedule.exists({busId:req.params.busId})){
       res.status(httpStatus.OK).json({
         status: false,
-        message: 'Remove the bus schedule first!',
+        message: 'Remove the vehicle schedule first!',
        })
 
      }else if(await Bus.exists({_id:req.params.busId})){
