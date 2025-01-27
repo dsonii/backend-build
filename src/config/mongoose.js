@@ -15,14 +15,14 @@ const mongoDBURL = mongo.uri
   ? mongo.uri
   : `mongodb+srv://${username}:${password}@${host}/${database}`;
 // const mongoDBURLNew = `${mongoDBURL}${database}`;
-
+console.log("dbUrl", mongoDBURL);
 // Exit application on error
 mongoose.connection.on("error", (err) => {
   logger.error(`MongoDB connection error: ${err}`);
   process.exit(-1);
 });
 
-
+console.log("dbUrl this testing", mongoDBURL);
 
 // print mongoose logs in dev env
 if (env === "development") {

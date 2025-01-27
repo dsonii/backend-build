@@ -88,7 +88,7 @@ app.use(async (req, res, next) => {
 
 // mount api v1 routes
 app.use('/', routes);
-console.log(routes);
+// console.log(routes);
 // if error is not an instanceOf APIError, convert it.
 app.use(error.converter);
 
