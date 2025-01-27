@@ -1,7 +1,5 @@
 // You can either "yarn add aws-sdk" or "npm i aws-sdk"
 
-const { S3Client, AbortMultipartUploadCommand } = require("@aws-sdk/client-s3");
-
 const BUCKET_NAME = process.env.AWS_S3_BUCKET;
 
 // Configure AWS to use promise
@@ -13,15 +11,7 @@ const BUCKET_NAME = process.env.AWS_S3_BUCKET;
 // });
 
 // Create an s3 instance
-const s3Client = new S3Client({
-  forcePathStyle: false, // Configures to use subdomain/virtual calling format.
-  endpoint: "https://nyc3.digitaloceanspaces.com",
-  region: process.env.AWS_DEFAULT_REGION, //"us-east-1",
-  credentials: {
-    accessKeyId: process.env.SPACES_KEY,
-    secretAccessKey: process.env.SPACES_SECRET
-  }
-});
+const s3Client = {};
 
 /**
  *
@@ -33,34 +23,34 @@ module.exports = {
         // console.log('1212 ',base64, userId, folderName)
         // Ensure that you POST a base64 data to your server.
         // Let's assume the variable "base64" is one.
-        const base64Data = new Buffer.from(base64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+        // const base64Data = new Buffer.from(base64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
 
-        // Getting the file type, ie: jpeg, png or gif
-        const type = 'png'; // base64.split(';')[0].split('/')[1];
-        const params = {
-            Bucket: `${BUCKET_NAME}/${folderName}`, // drivers/Profiles
-            Key: `${userId}.${type}`, // type is not required
-            Body: base64Data,
-            ACL: 'public-read',
-            ContentEncoding: 'base64', // required
-            ContentType: `image/${type}`, // required. Notice the back ticks
-        };
+        // // Getting the file type, ie: jpeg, png or gif
+        // const type = 'png'; // base64.split(';')[0].split('/')[1];
+        // const params = {
+        //     Bucket: `${BUCKET_NAME}/${folderName}`, // drivers/Profiles
+        //     Key: `${userId}.${type}`, // type is not required
+        //     Body: base64Data,
+        //     ACL: 'public-read',
+        //     ContentEncoding: 'base64', // required
+        //     ContentType: `image/${type}`, // required. Notice the back ticks
+        // };
 
 
-        let location = '';
-        let key = '';
-        try {
-            const {
-                Location,
-                Key,
-            } = await s3Client.upload(params).promise();
-            location = Location;
-            key = Key;
-            //   console.log('location',location,key)
-            return location;
-        } catch (error) {
-            console.log('s3 error', error)
-        }
+        // let location = '';
+        // let key = '';
+        // try {
+        //     const {
+        //         Location,
+        //         Key,
+        //     } = await s3Client.upload(params).promise();
+        //     location = Location;
+        //     key = Key;
+        //     //   console.log('location',location,key)
+        //     return location;
+        // } catch (error) {
+        //     console.log('s3 error', error)
+        // }
 
         // Save the Location (url) to your database and Key if needs be.
         // As good developers, we should return the url and let other function do the saving to database etc
