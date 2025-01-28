@@ -13,16 +13,16 @@ const rs = mongo.rs;
 console.log("mongoDBDATABASE", database);
 const mongoDBURL = mongo.uri
   ? mongo.uri
-  : `mongodb+srv://${username}:${password}@${host}/${database}`;
+  : `mongodb://${username}:${password}@${host}/${database}?authSource=admin`;
 // const mongoDBURLNew = `${mongoDBURL}${database}`;
-console.log("dbUrl", mongoDBURL);
+
 // Exit application on error
 mongoose.connection.on("error", (err) => {
   logger.error(`MongoDB connection error: ${err}`);
   process.exit(-1);
 });
 
-console.log("dbUrl this testing", mongoDBURL);
+
 
 // print mongoose logs in dev env
 if (env === "development") {
