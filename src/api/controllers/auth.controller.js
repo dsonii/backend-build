@@ -734,7 +734,7 @@ exports.create = async (req, res, next) => {
     }
 
     const getRoleId = await Role.findOne({ slug: slug(role) }).lean();
-    //  objadmin.roleId = getRoleId._id; // find role ID to save admin collection
+     objadmin.roleId = getRoleId._id; // find role ID to save admin collection
     const admin = new Admin(objadmin);
     const savedAdmin = await admin.save();
     const adminRole = new AdminRole({
