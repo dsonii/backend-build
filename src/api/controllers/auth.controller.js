@@ -919,13 +919,7 @@ exports.update = async (req, res, next) => {
       } else {
         update.picture = adminexists.picture;
       }
-      const updateadmins = await Admin.findByIdAndUpdate(
-        mongoose.Types.ObjectId(req.params.adminId),
-        update,
-        {
-          new: true,
-        }
-      );
+      
       const getRoleId = await Role.findOne({ slug: slug(role) }).lean();
 
       let getAdminRole = await AdminRole.findOne({
@@ -947,6 +941,15 @@ exports.update = async (req, res, next) => {
         });
         await adminRole.save();
       }
+      update.roleId = mongoose.Types.ObjectId(getRoleId._id);
+      const updateadmins = await Admin.findByIdAndUpdate(
+        mongoose.Types.ObjectId(req.params.adminId),
+        update,
+        {
+          new: true,
+        }
+      );
+
       if (updateadmins) {
         const existAdminDetail = await AdminDetail.findOne({
           adminId: mongoose.Types.ObjectId(req.params.adminId),
