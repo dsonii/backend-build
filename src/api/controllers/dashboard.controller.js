@@ -27,9 +27,9 @@ exports.countDown = async (req, res, next) => {
       status: true,
       data: {
         countCustomer: {
-          startVal: 3000,
+          startVal: 0,
           endVal: getcustomer,
-          duration: 10000,
+          duration: 5000,
         },
         countDriver: {
           startVal: 0,
@@ -42,12 +42,12 @@ exports.countDown = async (req, res, next) => {
         //   duration: 4000,
         // },
         countHelp: {
-          startVal: 2000,
+          startVal: 0,
           endVal: getHelpSupport,
           duration: 4000,
         },
 		    countTotalBooking: {
-          startVal: 800,
+          startVal: 0,
           endVal: totalBooking,
           duration: 8000,
         },
@@ -57,7 +57,7 @@ exports.countDown = async (req, res, next) => {
           duration: 5000,
         },
         todayCompletedBooking: {
-          startVal: 500,
+          startVal: 0,
           endVal: todayCompletedBooking,
           duration: 5000,
         },
