@@ -49,8 +49,8 @@ exports.count = async (req, res, next) => {
 exports.get = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.bookingId)
-      .populate({ path: "pickupId", select: "_id title" })
-      .populate({ path: "dropoffId", select: "_id title" })
+      .populate({ path: "pickupId", select: "_id title location" })
+      .populate({ path: "dropoffId", select: "_id title location" })
       .populate({ path: "routeId", select: "_id title" })
       .populate({ path: "busId", select: "_id name reg_no model_no" })
       .populate({

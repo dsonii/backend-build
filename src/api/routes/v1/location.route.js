@@ -36,6 +36,11 @@ router
 router
   .route('/:locationId')
   .get(getAuth('stop.edit', 'master.admin'), controller.get)
+
+
+  router
+  .route('/current/:bookingId')
+  .get(controller.getCurrentLocation)
   /**
   * update the single location
   * */

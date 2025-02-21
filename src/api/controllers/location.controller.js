@@ -3,10 +3,11 @@ const Location = require("../models/location.model");
 const { imageDelete, imageUpload, uploadLocal, deleteLocal} = require("../services/uploaderService");
 const uuidv4 = require("uuid/v4");
 const { omit } = require("lodash");
-
+const mongoose = require("mongoose");
 const Route = require("../models/route.model");
 const RouteStop = require("../models/routeStop.model");
 const Setting = require("../models/setting.model");
+const CurrentLocation = require("../models/currentLocation.model");
 const fs = require("fs").promises;
 const path = require("path");
 
@@ -46,6 +47,23 @@ exports.load = async (req, res) => {
     res.json({
       message: "stop load successfully.",
       data: Location.transformLoad(location),
+      status: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
+
+exports.getCurrentLocation = async (req, res) => {
+  try {
+    const location = await CurrentLocation.findOne({bookingId: mongoose.Types.ObjectId(req.params.bookingId)});
+    res.status(httpStatus.OK);
+    res.json({
+      message: "load successfully.",
+      data: location,
+      data1: req.params.bookingId,
       status: true,
     });
   } catch (error) {
