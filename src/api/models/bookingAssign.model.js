@@ -57,14 +57,6 @@ route_name:item.routeId.title
       },
       dates:this.formatDates(item.dates),
       assistant:{
-        id:item.assistantId._id,
-        title:item.assistantId.firstname+' '+item.assistantId.lastname,
-        pageid: objectIdToTimestamp(item._id),
-        country_code:item.assistantId.country_code,
-        phone:item.assistantId.phone,
-        picture:this.isValidURL(item.assistantId.picture)
-            ? item.assistantId.picture
-            : `${FULLBASEURL}public/drivers/profiles/` + item.assistantId.picture
       }
     }
   },
