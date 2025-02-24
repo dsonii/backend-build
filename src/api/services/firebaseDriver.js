@@ -1,10 +1,10 @@
 const admin = require("firebase-admin");
 
-const driverServiceAccount = require("./files/lastmilemobility-d9439-firebase-adminsdk-l0asf-3d2e8ea861");
+const driverServiceAccount = require("./files/ferridriver-6c173-firebase-adminsdk-ucep7-83125f95b4.json");
 
 // add your firebase db url here
 const FIREBASE_DATABASE_URL =
-  "https://lastmilemobility-d9439-default-rtdb.firebaseio.com";
+  "https://ferridriver-6c173-default-rtdb.firebaseio.com";
 
 admin.initializeApp({
   credential: admin.credential.cert(driverServiceAccount),

@@ -292,7 +292,13 @@ exports.list = async (req, res, next) => {
         docs: "payments",
       },
       sort
-    
+      // populate: [
+      //   { path: 'bookingId', select: '_id pnr_no discount' },
+      //   { path: 'userId', select: '_id firstname lastname  phone email gender ' },
+      //   { path: 'payments', select: '_id orderId payment_status payment_created amount ferriOrderId paymentId' },
+
+      // ],
+      // lean: true,
     };
     const result = await Payment.aggregatePaginate(
       aggregateQuery,

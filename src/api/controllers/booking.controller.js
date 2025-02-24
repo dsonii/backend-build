@@ -49,15 +49,19 @@ exports.count = async (req, res, next) => {
 exports.get = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.bookingId)
-      .populate({ path: "pickupId", select: "_id title" })
-      .populate({ path: "dropoffId", select: "_id title" })
+      .populate({ path: "pickupId", select: "_id title location" })
+      .populate({ path: "dropoffId", select: "_id title location" })
       .populate({ path: "routeId", select: "_id title" })
       .populate({ path: "busId", select: "_id name reg_no model_no" })
       .populate({
         path: "userId",
         select: "_id firstname lastname phone email gender ",
       });
-   
+    // .populate({
+    //   path: 'payments',
+    //   select: '_id orderId payment_status is_pass payment_created createdAt method amount ferriOrderId paymentId passId',
+    //   populate: { path: 'passId', select: '_id no_of_rides' },
+    // });
     const formatedData = await Booking.transformSingleData(booking);
     const paymentDetail = await Payment.findOne({
       bookingId: { $in: [mongoose.Types.ObjectId(formatedData.id)] },

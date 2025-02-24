@@ -26,6 +26,11 @@ router
 
 
   router
+  .route('/book/:bookingId')
+  .get(controller.getBooking);
+
+
+  router
   .route('/histories/:customerId')
 
   .get(getAuth('booking.view', 'master.admin'), controller.bookingHistories);

@@ -34,8 +34,9 @@ const sendOTPTextLocal = async (phone, OTP) => {
     const senderID = encodeURI(getsetting.sms.senderId);
     const apiKey = getsetting.sms.apiKey;
     const number = encodeURI(phone);
+    //Welcome to Ferri Shuttle. %%|otp^{"inputtype" : "text","maxlength" : "5"}%% is the ACCOUNT PASSWORD for your account. DO NOT SHARE with anyone.
     const message = encodeURIComponent(
-      `Welcome to Lastmile. ${OTP} is the ACCOUNT PASSWORD for your account. DO NOT SHARE with anyone.`
+      `Welcome to Ferri Shuttle. ${OTP} is the ACCOUNT PASSWORD for your account. DO NOT SHARE with anyone.`
     );
     const params = `apikey=${apiKey}&numbers=${number}&sender=${senderID}&message=${message}`;
     const BaseURL = `https://api.textlocal.in/send/?${params}`;

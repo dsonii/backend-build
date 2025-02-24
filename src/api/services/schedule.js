@@ -26,6 +26,8 @@ schedule.backupDB = function () {
       `--db=${DB_NAME}`,
       `--archive=${ARCHIVE_PATH}`,
 	    '--gzip',
+      // `--username=${DB_NAME}`,
+      // '--password=BusFerri2021MSXBF',
     ]);
 
     child.stdout.on('data', (data) => {
