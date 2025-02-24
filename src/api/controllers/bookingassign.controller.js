@@ -35,26 +35,6 @@ exports.get = async (req, res) => {
   }
 };
 
-exports.getBooking = async (req, res) => {
-  try {
-    const result = await BookingAssign.findById(req.params.assignId)
-	.populate({ path:"busScheduleId"})
-	.populate({ path:"routeId"})
-    .populate({ path: "driverId", select: "firstname lastname country_code phone picture" })
-    .populate({ path: "assistantId", select: "firstname lastname country_code phone picture" });
-   
-    res.status(httpStatus.OK);
-    res.json({
-      message: "Booking Assign fetched successfully.",
-      data:await BookingAssign.formatData(result) ,// getBookingAssign.length > 0 ? getBookingAssign[0] : {}, //,await BookingAssign.formatData(result),
-      status: true,
-    });
-  } catch (error) {
-    console.log(error);
-    return error;
-  }
-};
-
 /**
  * Create new Booking Assign
  * @public

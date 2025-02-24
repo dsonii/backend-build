@@ -85,6 +85,45 @@ exports.get = async (req, res) => {
   }
 };
 
+
+/**
+ * Get booking
+ * @public
+ */
+exports.getBooking = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.bookingId)
+      .populate({ path: "pickupId", select: "_id title location" })
+      .populate({ path: "dropoffId", select: "_id title location" })
+      .populate({ path: "routeId", select: "_id title" })
+      .populate({ path: "busId", select: "_id name reg_no model_no" })
+      .populate({
+        path: "userId",
+        select: "_id firstname lastname phone email gender ",
+      });
+    const formatedData = await Booking.transformSingleData(booking);
+    const paymentDetail = await Payment.findOne({
+      bookingId: { $in: [mongoose.Types.ObjectId(formatedData.id)] },
+    }).populate({ path: "passId", select: "no_of_rides" });
+    formatedData.payment_detail = await Payment.transformSingleData(
+      paymentDetail
+    );
+    formatedData.default_currency = await Currency.defaultPaymentCurrency();
+    formatedData.payment_detail.default_currency =
+      formatedData.default_currency;
+    // console.log('formatedData', formatedData);
+    res.status(httpStatus.OK);
+    res.json({
+      message: "booking fetched successfully.",
+      data: formatedData,
+      status: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
 /**
  * Get booking layout list
  * @public
