@@ -256,7 +256,7 @@ exports.get = async (req, res) => {
             },
             {
               $project: {
-				routeId: 1,
+				      routeId: 1,
                 stopId: 1,
                 order: 1,
                 location: 1,
@@ -283,7 +283,7 @@ exports.get = async (req, res) => {
               as: "stop",
               in: {
                 id: "$$stop._id",
-				routeId: "$$stop.routeId",
+				        routeId: "$$stop.routeId",
                 stopId: "$$stop.stopId",
                 location: "$$stop.location",
                 order: "$$stop.order",
@@ -483,7 +483,7 @@ exports.list = async (req, res, next) => {
           total_stops: {
             $sum: 1,
           },
-		  integer_id: { $first: "$integer_id" },
+		      integer_id: { $first: "$integer_id" },
           title: { $first: "$title" },
           status: { $first: "$status" },
           createdAt: { $first: "$createdAt" },
@@ -491,12 +491,68 @@ exports.list = async (req, res, next) => {
         },
       },
       {
+        $lookup: {
+          from: "route_stops",
+          let: { routeId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$routeId", "$$routeId"] } } },
+            {
+              $lookup: {
+                from: "locations",
+                let: { stopId: "$stopId" },
+                pipeline: [
+                  { $match: { $expr: { $eq: ["$_id", "$$stopId"] } } },
+                  {
+                    $project: {
+                      _id: 0,
+		                  id:"$_id",
+                      address: 1,
+                      title: 1,
+                      coordinates: "$location.coordinates",
+                      type: 1,
+                    },
+                  },
+                ],
+                as: "location",
+              },
+            },
+            {
+              $unwind: "$location",
+            },
+            {
+              $project: {
+				      routeId: 1,
+                stopId: 1,
+                order: 1,
+                location: 1,
+                minimum_fare_pickup: 1,
+                minimum_fare_drop: 1,
+                price_per_km_drop: 1,
+                price_per_km_pickup: 1,
+                departure_time: 1,
+                arrival_time: 1,
+              },
+            },
+          ],
+          as: "route_stop_new",
+        },
+      },
+      {
         $project: {
           _id: 0,
           ids: "$_id",
-		  integer_id: 1,
+		      integer_id: 1,
           title: 1,
           total_stops: 1,
+          stops: {
+            $map: {
+              input: "$route_stop_new",
+              as: "stop",
+              in: {
+                location: "$$stop.location.title",
+              },
+            },
+          },
           status: {
             $cond: {
               if: { $eq: ["$status", true] },
