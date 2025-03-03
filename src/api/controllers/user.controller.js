@@ -94,7 +94,7 @@ exports.create = async (req, res, next) => {
     });
 
     const savedWallet = await wallet.save();
-    
+    req.body.bookedBy = 'admin';
     let getBooking = await userService.saveBookings(req, res, savedUser, savedWallet, false);
     let update = [];
     update.push(mongoose.Types.ObjectId(getBooking._id));
@@ -521,7 +521,7 @@ exports.update = async (req, res, next) => {
     if (req.body.route) {
       const findUser = await User.findOne({_id: mongoose.Types.ObjectId(req.params.userId)});
       const findWallet = await Wallet.findOne({users: mongoose.Types.ObjectId(req.params.userId)});
-
+      req.body.bookedBy = 'admin';
       let getBooking = await userService.saveBookings(req, res, findUser, findWallet, false);
       let update = [];
       update.push(mongoose.Types.ObjectId(getBooking._id));
