@@ -510,6 +510,8 @@ exports.update = async (req, res, next) => {
         }
       };
     }
+    mongoose.set('debug', true);
+    const findUser = await User.findOne({_id: mongoose.Types.ObjectId(req.params.userId)});
 
     const updateusers = await User.findByIdAndUpdate(
       req.params.userId,
@@ -518,8 +520,34 @@ exports.update = async (req, res, next) => {
         new: true,
       }
     );
+    let getBookedSeatsNew  = "";
     if (req.body.route) {
-      const findUser = await User.findOne({_id: mongoose.Types.ObjectId(req.params.userId)});
+      let defaultBooking = findUser.defaultBookingId;
+      
+      if (defaultBooking.length > 0) {
+        let bookindIds  = [];
+        if (typeof defaultBooking[0] != 'undefined') {
+          bookindIds.push(mongoose.Types.ObjectId(defaultBooking[0]));
+        }
+        if (typeof defaultBooking[1] != 'undefined') {
+          bookindIds.push(mongoose.Types.ObjectId(defaultBooking[1]));
+        }
+        
+        getBookedSeatsNew = await Booking.find({
+          _id:{ "$in" : bookindIds}, 
+          bookedBy: "admin",
+          travel_status: "PROCESSING",
+        });
+        if (getBookedSeatsNew != "" && getBookedSeatsNew != null) {
+          for (let i = 0; i < getBookedSeatsNew.length; i++) {
+            if (typeof getBookedSeatsNew[i] != 'undefined') {
+              let BookingFinalIds = getBookedSeatsNew[i]._id;
+              await Booking.findByIdAndUpdate({_id:BookingFinalIds}, {is_deleted:true});
+            }
+          }
+        }
+      }
+      
       const findWallet = await Wallet.findOne({users: mongoose.Types.ObjectId(req.params.userId)});
       req.body.bookedBy = 'admin';
       let getBooking = await userService.saveBookings(req, res, findUser, findWallet, false);

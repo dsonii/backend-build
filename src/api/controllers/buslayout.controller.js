@@ -7,6 +7,7 @@ const Bus = require("../models/bus.model");
 const Booking = require("../models/booking.model");
 const mongoose = require("mongoose");
 
+const moment = require("moment-timezone");
 
 /**
  * Load user and append to req.
@@ -97,7 +98,7 @@ exports.searchSeat = async (req, res) => {
         const getBookedSeats = await Booking.find({
           busId:mongoose.Types.ObjectId(req.params.busId), 
           seat_nos: { $in: trimseat_nos },
-          bus_depature_date: {$gte: new Date()},
+          bus_depature_date: {$gte: moment().tz(DEFAULT_TIMEZONE).format('YYYY-MM-DD')},
           travel_status: "SCHEDULED",
           scheduleId : req.query.scheduleId,
         });
@@ -110,6 +111,33 @@ exports.searchSeat = async (req, res) => {
             }
           }
         }
+       
+        const getBookedSeatsNew = await Booking.find({
+          busId:mongoose.Types.ObjectId(req.params.busId), 
+          seat_nos: { $in: trimseat_nos },
+          bus_depature_date: {$gte: moment().tz(DEFAULT_TIMEZONE).format('YYYY-MM-DD')},
+          bookedBy: "admin",
+          travel_status: "PROCESSING",
+          is_deleted: false,
+          scheduleId : req.query.scheduleId,
+        });
+
+        if (getBookedSeatsNew) {
+          for (dseatss of getBookedSeatsNew) { 
+            let moomentObj = moment(dseatss.start_time, ["h:mm A"]).format("HH:mm");
+            let splitTime = moomentObj.split(":");
+            let currentTime = moment().tz(DEFAULT_TIMEZONE).format('HH:mm');
+
+            let finalTine = splitTime[0]-1 +":"+ splitTime[1];
+            if (currentTime < finalTine) {
+              let currentAssignedSeatss = dseatss.seat_nos.toString();
+              if (trimseat_nos.includes(currentAssignedSeatss)){
+                  trimseat_nos.splice(trimseat_nos.indexOf(currentAssignedSeatss), 1); 
+              }
+            }
+          }
+        }
+
       }
     }
 

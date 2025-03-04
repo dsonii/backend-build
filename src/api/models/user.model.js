@@ -60,7 +60,6 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
     ProfilePic: { type: String,default:"default.jpg" },
-    language:{type:String,enum:["en","ar"],default:"en"},
     is_deleted: { type: Boolean, default: false },
     status: { type: Boolean, default: true },
     places: {
