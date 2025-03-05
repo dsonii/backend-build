@@ -30,7 +30,7 @@ router
 router
   .route('/')
   .get(getAuth('driver.view', 'master.admin'), Validate(driverValidation.listDrivers), controller.list)
-  .post(getAuth('driver.create', 'master.admin'), Validate(driverValidation.createDriver), controller.create);
+  .post(getAuth('driver.create', 'master.admin'),  controller.create);
 
 router
   .route('/:driverId/status')
@@ -47,7 +47,7 @@ router
 /**
      * update the single location
      * */
-  .patch(getAuth('driver.edit', 'master.admin'), Validate(driverValidation.updateDriver), controller.update)
+  .patch(getAuth('driver.edit', 'master.admin'),  controller.update)
 /**
      * delete  the single location
      * */
