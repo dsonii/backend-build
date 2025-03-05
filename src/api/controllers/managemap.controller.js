@@ -13,52 +13,102 @@ exports.driverData = async (req, res, next) => {
      const { search,duty_status } = req.query;
     let condition ={};
 
-    if(search != ''){
-      condition = {
-        $match: {
-          $and: [
-            {
-              type: "driver",
-            },
-            { status: true },
-            { duty_status: duty_status },
-          ],
-          $or: [
-            {
-              firstname: {
-                $regex: new RegExp(search),
-                $options: "i",
+    if (duty_status == 'TRACK') {
+      if(search != ''){
+        condition = {
+          $match: {
+            $and: [
+              {
+                type: "driver",
               },
-            },
-            {
-              lastname: {
-                $regex: new RegExp(search),
-                $options: "i",
+              { status: true },
+            ],
+            $or: [
+              {
+                firstname: {
+                  $regex: new RegExp(search),
+                  $options: "i",
+                },
               },
-            },
-            {
-              phone: {
-                $regex: new RegExp(search),
-                $options: "i",
+              {
+                lastname: {
+                  $regex: new RegExp(search),
+                  $options: "i",
+                },
               },
-            },
-          ]
-        },
-      };
-    }else{
-      condition = {
-        $match: {
-          $and: [
-            {
-              type: "driver",
-            },
-            { status: true },
-            { duty_status: req.query.duty_status },
-          ],
-        },
-      };
-
+              {
+                phone: {
+                  $regex: new RegExp(search),
+                  $options: "i",
+                },
+              },
+            ]
+          },
+        };
+      }else{
+        condition = {
+          $match: {
+            $and: [
+              {
+                type: "driver",
+              },
+              { status: true },
+            ],
+          },
+        };
+  
+      }
+    } else {
+      if(search != ''){
+        condition = {
+          $match: {
+            $and: [
+              {
+                type: "driver",
+              },
+              { status: true },
+              { duty_status: duty_status },
+            ],
+            $or: [
+              {
+                firstname: {
+                  $regex: new RegExp(search),
+                  $options: "i",
+                },
+              },
+              {
+                lastname: {
+                  $regex: new RegExp(search),
+                  $options: "i",
+                },
+              },
+              {
+                phone: {
+                  $regex: new RegExp(search),
+                  $options: "i",
+                },
+              },
+            ]
+          },
+        };
+      }else{
+        condition = {
+          $match: {
+            $and: [
+              {
+                type: "driver",
+              },
+              { status: true },
+              { duty_status: req.query.duty_status },
+            ],
+          },
+        };
+  
+      }
     }
+    
+
+  
     const driver = await Driver.aggregate([
       condition,
       {

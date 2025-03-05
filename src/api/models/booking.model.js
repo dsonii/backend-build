@@ -46,6 +46,7 @@ const bookingSchema = new mongoose.Schema(
       default: null,
     },
     seat_nos: { type: [String], default: [""] },
+    bookedBy: { type: String, default: "" },
     is_deleted: { type: Boolean, default: false },
     travel_status: {
       type: String,

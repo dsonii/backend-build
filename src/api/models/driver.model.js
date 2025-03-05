@@ -27,8 +27,6 @@ const driverSchema = new mongoose.Schema(
     email: {
       type: String,
       match: /^\S+@\S+\.\S+$/,
-      required: true,
-      unique: true,
       trim: true,
       lowercase: true,
     },

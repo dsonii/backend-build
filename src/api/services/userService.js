@@ -62,6 +62,12 @@ const { nanoid } = require("nanoid");
               return_seat,
             } = req.body;
             let fareData = "";
+            let bookedBy = '';
+            if (typeof req.body.bookedBy != 'undefined') {
+              if (req.body.bookedBy != "") {
+                  bookedBy = 'admin';
+              }
+            }
 
         if (busScheduleId && route && bus)    {
           const currentDate = moment().format("YYYY-MM-DD");
@@ -128,6 +134,7 @@ const { nanoid } = require("nanoid");
                 .tz("Asia/Kolkata")
                 .format("YYYY-MM-DD")
             ),
+            bookedBy:bookedBy,
           };
     
           if (
