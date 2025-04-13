@@ -52,6 +52,30 @@ const driverSchema = new mongoose.Schema(
       trim: true,
       index: true,
     },
+    emergency_number: {
+      type: String,
+      trim: true,
+      index: true,
+      default: "",
+    },
+    gender: {
+      type: String, 
+      enum: ["male","female","not_disclose"],
+      default: "",
+    },
+    dob: {
+      type: Date,
+      default: ""
+    },
+    temporary_address: {
+      type: String,
+      default: "",
+    },
+    permanent_address: {
+      type: String,
+      default: "",
+    },
+
     country_code: { type: String, default: "91" },
     type: { type: String, enum: ["driver", "assistant"], default: "assistant" },
     device_token: { type: String, default: "", index: true },
@@ -134,6 +158,11 @@ driverSchema.method({
       "document_licence",
       "document_national_icard",
       "status",
+      "gender",
+      "dob",
+      "temporary_address",
+      "permanent_address",
+      "emergency_number",
       "duty_status",
       "licence_expiry_date",
       "police_vertification_expiry_date",
@@ -283,6 +312,11 @@ driverSchema.statics = {
           country_code: item.country_code,
           phone: item.phone,
           type: item.type,
+          dob: item.dob,
+          gender: item.gender,
+          temporary_address: item.temporary_address,
+          permanent_address: item.permanent_address,
+          emergency_number: item.emergency_number,
           licence_expiry_date: item.licence_expiry_date,
           police_vertification_expiry_date: item.police_vertification_expiry_date,
           picture: this.isValidURL(item.picture)

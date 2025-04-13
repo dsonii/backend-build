@@ -85,6 +85,11 @@ exports.get = async (req, res, next) => {
           national_id: 1,
           licence_expiry_date: 1,
           police_vertification_expiry_date: 1,
+          gender: 1,
+          dob: 1,
+          emergency_number: 1,
+          temporary_address: 1,
+          permanent_address: 1,
           duty_status: { $ifNull: ["$duty_status", "OFFLINE"] },
           document_licence: {
             $cond: [
@@ -386,6 +391,11 @@ exports.create = async (req, res, next) => {
       document_police_vertification,
       licence_expiry_date,
       police_vertification_expiry_date,
+      gender,
+      dob,
+      permanent_address,
+      temporary_address,
+      emergency_number
     } = req.body;
     const FolderName = process.env.S3_BUCKET_DRIVERDOC;
     const objDriver = {
@@ -400,6 +410,11 @@ exports.create = async (req, res, next) => {
       national_id,
       licence_expiry_date,
       police_vertification_expiry_date,
+      gender,
+      dob,
+      permanent_address,
+      temporary_address,
+      emergency_number
     };
 
     const isProductionS3 = await Setting.gets3();
@@ -505,6 +520,11 @@ exports.update = async (req, res, next) => {
       national_id: req.body.national_id,
       picture: req.body.picture,
       document_licence: req.body.document_licence,
+      gender: req.body.gender,
+      dob: req.body.dob,
+      permanent_address: req.body.permanent_address,
+      temporary_address: req.body.temporary_address,
+      emergency_number: req.body.emergency_number,
       document_national_icard: req.body.document_national_icard,
       document_police_vertification: req.body.document_police_vertification,
       police_vertification_expiry_date: police_vertification_expiry_date,
@@ -723,6 +743,11 @@ exports.list = async (req, res, next) => {
           type: 1,
           licence_expiry_date: 1,
           police_vertification_expiry_date: 1,
+          gender: 1,
+          dob: 1,
+          emergency_number:1,
+          temporary_address: 1,
+          permanent_address: 1,
           duty_status: { $ifNull: ["$duty_status", "OFFLINE"] },
           document_licence: {
             $cond: [

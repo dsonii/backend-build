@@ -9,6 +9,12 @@ router.route("/term-and-conditions").get(controller.terms);
 
 router.route("/privacy").get(controller.privacy);
 
+
+router.route("/message").get((req, res) => {
+  res.json({ message: "hello there" });
+});
+router.route("/app/general").get(controller.fetch);
+
 router
   .route("/")
   .post(
@@ -20,7 +26,7 @@ router
   .route("/:type")
   .get(getAuth("manage.application.settings", "master.admin"), controller.get);
 
-router.route("/app/general").get(controller.fetch);
+
 
 router
   .route("/:settingId")

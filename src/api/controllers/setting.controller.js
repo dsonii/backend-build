@@ -46,8 +46,10 @@ exports.privacy = async (req, res) => {
  * @public
  */
 exports.fetch = async (req, res) => {
+  console.log("Fetching general settings...");
   try {
     const settings = await Setting.findOne({}).sort({ _id: -1 });
+    
     res.status(httpStatus.OK);
     res.json({
       appName: settings.general.name,

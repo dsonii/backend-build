@@ -30,7 +30,7 @@ router
 router
   .route('/')
   .get(getAuth('driver.view', 'master.admin'), Validate(driverValidation.listDrivers), controller.list)
-  .post(getAuth('driver.create', 'master.admin'),  controller.create);
+  .post(getAuth('driver.create', 'master.admin'), controller.create);
 
 router
   .route('/:driverId/status')

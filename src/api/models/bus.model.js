@@ -67,6 +67,19 @@ const busSchema = new mongoose.Schema({
     certificate_fitness_expiry_date: { type: Date },
     certificate_permit: { type: String },
     certificate_permit_expiry_date: { type: Date },
+    owner_name: {
+        type: String,
+        default: ''
+    },
+    fuel_type: {
+        type: String,
+        enum: ['Petrol', 'Diesel','CNG','Electric','Hybrid'],
+        default: ''
+    },
+    hypothecation_detail: {
+        type: String,
+        default: ''
+    },
     status: { type: Boolean, default: true },
 }, {
     timestamps: true,
@@ -90,6 +103,9 @@ busSchema.method({
             "certificate_pollution",
             "certification_insurance",
             "certificate_fitness",
+            "owner_name",                
+            "fuel_type",                 
+            "hypothecation_detail", 
             "certificate_permit",
             "status",
             "createdAt",
@@ -158,6 +174,9 @@ busSchema.statics = {
             brand: item.brand,
             model_no: item.model_no,
             chassis_no: item.chassis_no,
+            owner_name: item.owner_name,
+            fuel_type: item.fuel_type,
+            hypothecation_detail: item.hypothecation_detail,
             type: (item.bustypeId) ? item.bustypeId.name : '',
             layout: (item.buslayoutId) ? item.buslayoutId.name : '',
             max_seats: (item.buslayoutId) ? item.buslayoutId.max_seats : '',

@@ -78,4 +78,5 @@ router.use('/permissions', permissionRoutes);
 router.use('/payment-gateways', paymentgatewayRoutes);
 router.use('/map', MapRoutes);
 router.use('/bus-schedules',busScheduleRoutes);
+
 module.exports = router;

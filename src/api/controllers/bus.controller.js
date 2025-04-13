@@ -92,7 +92,9 @@ exports.isRegistrationExists = async (req, res, next) => {
  */
 exports.get = async (req, res) => {
   try {
+    
     const bus = await Bus.findById(req.params.busId).populate("adminId").populate("bustypeId");
+    console.log("hello", bus);
     res.status(httpStatus.OK);
     res.json({
       message: "Bus fetched successfully.",
@@ -296,6 +298,9 @@ exports.create = async (req, res, next) => {
       certificate_permit,
       certificate_permit_expiry_date,
       status,
+      owner_name,
+      fuel_type,
+      hypothecation_detail
     } = req.body;
     const FolderName = process.env.S3_BUCKET_BUS;
     const objBus = {
@@ -313,6 +318,9 @@ exports.create = async (req, res, next) => {
       certificate_insurance_expiry_date,
       certificate_fitness_expiry_date,
       certificate_permit_expiry_date,
+      owner_name,
+      fuel_type,
+      hypothecation_detail
     };
 
     const isProductionS3 = await Setting.gets3();
@@ -444,6 +452,9 @@ exports.update = async (req, res, next) => {
       certificate_permit_expiry_date:certificate_permit_expiry_date,
       chassis_no:req.body.chassis_no,
       amenities:req.body.amenities,
+      owner_name: req.body.owner_name,
+      fuel_type: req.body.fuel_type,
+      hypothecation_detail: req.body.hypothecation_detail
     };
     
     
@@ -699,6 +710,9 @@ exports.list = async (req, res, next) => {
           created_by:{ $ifNull:["$admin.firstname","-"]},
           picture: 1,
           amenities: 1,
+          owner_name: 1,
+          fuel_type: 1,
+          hypothecation_detail:1,
           certificate_registration: 1,
           certificate_pollution: 1,
           certificate_pollution_expiry_date:1, 
