@@ -60,7 +60,7 @@ const driverSchema = new mongoose.Schema(
     },
     gender: {
       type: String, 
-      enum: ["male","female","not_disclose"],
+      enum: ["male","female","not_disclosed"],
       default: "",
     },
     dob: {
