@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"2a6708f55e5a43aeb84704b8dc03effa","collectionName":"bookingassigns","type":"collection"}

@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"14d0856019e0415fa8d1392a0a15b6d1","collectionName":"bus_types","type":"collection"}

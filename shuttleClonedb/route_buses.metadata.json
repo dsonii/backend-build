@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"899aa21aa8934a5eaefbb914b460b2e8","collectionName":"route_buses","type":"collection"}
