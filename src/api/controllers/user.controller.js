@@ -318,6 +318,9 @@ exports.list = async (req, res, next) => {
 		  language:1,
           createdAt:1,
           refercode: 1,
+          emargency_number1: 1,
+          emargency_number2: 1,
+          emargency_number3: 1,
           status: {
             $cond: {
               if: { $eq: ["$status", true] },
