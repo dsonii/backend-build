@@ -56,3 +56,5 @@ theferridb.dbml
 
 AdminTheFerri.zip
 src/api/routes/v1/user.route.js_old
+
+src/api/services/files/*
